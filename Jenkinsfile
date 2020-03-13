@@ -29,36 +29,6 @@ pipeline {
     }
     options {parallelsAlwaysFailFast()}
     stages {
-        stage('Checkout source code') {
-            steps {
-                deleteDir()
-                checkout([$class: 'GitSCM',
-                          branches: [[name: '*/master']],
-                          doGenerateSubmoduleConfigurations: false,
-                          extensions: [],
-                          submoduleCfg: [],
-                          userRemoteConfigs: [[url: "https://github.com/stan-dev/stanc3.git", credentialsId: 'a630aebc-6861-4e69-b497-fd7f496ec46b']]]
-                )
-                script {
-
-                    sh "git checkout master && git pull"
-
-                    if (params.git_branch.contains("PR-")) {
-                        prNumber = params.git_branch.split("-")[1]
-                        sh """
-                            git fetch origin pull/${prNumber}/head:pr/${prNumber} && git checkout pr/${prNumber}
-                        """
-                    }
-                    else{
-                        sh """
-                            git pull && git checkout ${params.git_branch}
-                        """
-                    }
-
-                    stash 'Stanc3Setup'
-                }
-            }
-        }
         stage("Build and test static release binaries") {
             failFast true
             parallel {
@@ -66,9 +36,7 @@ pipeline {
                     agent { label "osx && ocaml" }
                     steps {
                         deleteDir()
-                        unstash 'Stanc3Setup'
-
-                        sh "ls -lhart"
+                        retry(3) { checkout scm }
 
                         runShell("""
                             eval \$(opam env)
@@ -101,8 +69,7 @@ pipeline {
                     }
                     steps {
                         deleteDir()
-                        unstash 'Stanc3Setup'
-                        sh "ls -lhart"
+                        retry(3) { checkout scm }
 
                         runShell("""
                             eval \$(opam env)
@@ -127,8 +94,7 @@ pipeline {
                     }
                     steps {
                         deleteDir()
-                        unstash 'Stanc3Setup'
-                        sh "ls -lhart"
+                        retry(3) { checkout scm }
 
                         runShell("""
                             eval \$(opam env)
@@ -153,8 +119,7 @@ pipeline {
                     agent { label "WSL" }
                     steps {
                         deleteDir()
-                        unstash 'Stanc3Setup'
-                        sh "ls -lhart"
+                        retry(3) { checkout scm }
                         
                         bat "bash -cl \"cd test/integration\""
                         bat "bash -cl \"find . -type f -name \"*.expected\" -print0 | xargs -0 dos2unix\""
