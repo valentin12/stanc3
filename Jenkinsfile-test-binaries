@@ -38,6 +38,7 @@ pipeline {
                 }
             }
             steps {
+                sh 'echo Hellow'
                 sh 'printenv'
                 runShell("""
                     eval \$(opam env)
