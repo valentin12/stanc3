@@ -1535,7 +1535,7 @@ let () =
   add_unqualified ("wishart_rng", ReturnType UMatrix, [UReal; UMatrix]) ;
   (* Embedded Laplace approximation *)
   add_qualified
-    ( "laplace_marginal_bernoulli"
+    ( "laplace_marginal_bernoulli_logit"
     , ReturnType UReal
     , [ (DataOnly, UArray UInt); (DataOnly, UArray UInt)
       ; ( AutoDiffable
@@ -1547,7 +1547,7 @@ let () =
       ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
       ; (AutoDiffable, UVector) ] ) ;
   add_qualified
-    ( "laplace_marginal_bernoulli"
+    ( "laplace_marginal_bernoulli_logit"
     , ReturnType UReal
     , [ (DataOnly, UArray UInt); (DataOnly, UArray UInt)
       ; ( AutoDiffable
@@ -1559,7 +1559,7 @@ let () =
       ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
       ; (AutoDiffable, UVector); (DataOnly, UReal); (DataOnly, UInt) ] ) ;
   add_qualified
-    ( "laplace_marginal_bernoulli"
+    ( "laplace_marginal_bernoulli_logit"
     , ReturnType UReal
     , [ (DataOnly, UArray UInt); (DataOnly, UArray UInt)
       ; ( AutoDiffable
@@ -1571,7 +1571,7 @@ let () =
           ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
           ; (AutoDiffable, UVector) ] ) ;
   add_qualified
-    ( "laplace_approx_bernoulli_rng"
+    ( "laplace_bernoulli_logit_rng"
     , ReturnType UVector
     , [ (DataOnly, UArray UInt)
       ; (DataOnly, UArray UInt)
@@ -1584,7 +1584,7 @@ let () =
           ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
           ; (AutoDiffable, UVector) ] ) ;
     add_qualified
-      ( "laplace_approx_bernoulli_rng"
+      ( "laplace_bernoulli_logit_rng"
       , ReturnType UVector
       , [ (DataOnly, UArray UInt)
         ; (DataOnly, UArray UInt)
@@ -1597,7 +1597,7 @@ let () =
             ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
             ; (AutoDiffable, UVector) ] ) ;
   add_qualified
-    ( "laplace_marginal_poisson"
+    ( "laplace_marginal_poisson_log"
     , ReturnType UReal
     , [ (DataOnly, UArray UInt); (DataOnly, UArray UInt)
       ; ( AutoDiffable
@@ -1609,7 +1609,7 @@ let () =
       ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
       ; (AutoDiffable, UVector) ] ) ;
   add_qualified
-    ( "laplace_marginal_poisson"
+    ( "laplace_marginal_poisson_log"
     , ReturnType UReal
     , [ (DataOnly, UArray UInt); (DataOnly, UArray UInt)
       ; (DataOnly, UVector)
@@ -1622,7 +1622,7 @@ let () =
       ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
       ; (AutoDiffable, UVector) ] ) ;
   add_qualified
-    ( "laplace_approx_poisson_rng"
+    ( "laplace_poisson_log_rng"
     , ReturnType UVector
     , [ (DataOnly, UArray UInt)
       ; (DataOnly, UArray UInt)
@@ -1635,7 +1635,7 @@ let () =
       ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
       ; (AutoDiffable, UVector) ] ) ;
   add_qualified
-    ( "laplace_approx_poisson_rng"
+    ( "laplace_poisson_log_rng"
     , ReturnType UVector
     , [ (DataOnly, UArray UInt)
       ; (DataOnly, UArray UInt)

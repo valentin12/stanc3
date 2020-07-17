@@ -14,7 +14,7 @@ transformed data {
   vector[1] x[1];
   real delta[1];
   int delta_int[1];
-  
+
   vector[1] theta0;
 }
 
@@ -25,18 +25,18 @@ parameters {
 
 model {
   target +=
-    laplace_marginal_poisson(y, n_samples, K, phi, x, delta, delta_int,
-                             theta0);
+    laplace_marginal_poisson_log(y, n_samples, K, phi, x, delta, delta_int,
+                                 theta0);
 
   target +=
-    laplace_marginal_poisson(y, n_samples, ye, K, phi, x, delta, delta_int,
-                             theta0);
+    laplace_marginal_poisson_log(y, n_samples, ye, K, phi, x, delta, delta_int,
+                                 theta0);
 }
 
 generated quantities {
   vector[1] theta_pred =
-    laplace_approx_poisson_rng(y, n_samples, K, phi, x, delta, delta_int,
+    laplace_poisson_log_rng(y, n_samples, K, phi, x, delta, delta_int,
                            theta0);
-  theta_pred = laplace_approx_poisson_rng(y, n_samples, ye, K, phi, x,
+  theta_pred = laplace_poisson_log_rng(y, n_samples, ye, K, phi, x,
                                           delta, delta_int, theta0);
 }

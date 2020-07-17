@@ -30,17 +30,17 @@ parameters {
 
 model {
   target +=
-    laplace_marginal_bernoulli(y, n_samples, K, phi, x, delta, delta_int,
+    laplace_marginal_bernoulli_logit(y, n_samples, K, phi, x, delta, delta_int,
                                theta0);
   target +=
-    laplace_marginal_bernoulli(y, n_samples, Km, phi, x_m, delta, delta_int,
+    laplace_marginal_bernoulli_logit(y, n_samples, Km, phi, x_m, delta, delta_int,
                                theta0);
 }
 
 generated quantities {
   vector[1] theta_pred
-    = laplace_approx_bernoulli_rng(y, n_samples, K, phi, x, delta, delta_int,
+    = laplace_bernoulli_rng(y, n_samples, K, phi, x, delta, delta_int,
                                    theta0);
-  theta_pred = laplace_approx_bernoulli_rng(y, n_samples, Km, phi, x_m, delta,
+  theta_pred = laplace_bernoulli_rng(y, n_samples, Km, phi, x_m, delta,
                                             delta_int, theta0);
 }
