@@ -24,9 +24,9 @@
    sudo add-apt-repository ppa:avsm/ppa
    sudo apt-get update
 ```
-2. Install `opam` `mingw-w64` `gcc` `m4` dependencies required
+2. Install `opam` `mingw-w64` `gcc` `m4` `make` dependencies required
 ```
-   sudo apt-get install opam mingw-w64 gcc m4 -y
+   sudo apt-get install opam mingw-w64 gcc m4 make -y
 ```
 3. Init opam, create and switch to 4.07.0, update environment shell
 
@@ -53,7 +53,7 @@ opam repository add windows git://github.com/ocaml-cross/opam-cross-windows
 ```
 6. Install the compiler
 ```
-   opam install ocaml-windows
+   opam install "ocaml-windows64<=4.07.0"
 ```
 7. Install opam packages that are required for build/runtest
 ```
@@ -82,9 +82,9 @@ Switch to the root of the project and run
    sudo add-apt-repository ppa:avsm/ppa
    sudo apt-get update
 ```
-2. Install `opam` `mingw-w64` `gcc` `m4` dependencies required
+2. Install `opam` `mingw-w64` `gcc` `m4` `make` dependencies required
 ```
-   sudo apt-get install opam mingw-w64 gcc m4 -y
+   sudo apt-get install opam mingw-w64 gcc m4 make -y
 ```
 3. Init opam, create and switch to 4.07.0, update environment shell
 ```

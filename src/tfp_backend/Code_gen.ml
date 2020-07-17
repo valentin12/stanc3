@@ -8,13 +8,21 @@ let pp_call ppf (name, pp_arg, args) =
   pf ppf "%s(@[<hov>%a@])" name (list ~sep:comma pp_arg) args
 
 let pp_call_str ppf (name, args) = pp_call ppf (name, string, args)
-let pystring_of_operator = function x -> strf "%a" Operator.pp x
+
+let pystring_of_operator = function
+  | Operator.IntDivide -> "//"
+  | Operator.Pow -> "**"
+  | x -> strf "%a" Operator.pp x
 
 let rec pp_expr ppf {Expr.Fixed.pattern; _} =
   match pattern with
   | Var ident -> string ppf ident
   | Lit (Str, s) -> pf ppf "%S" s
   | Lit (_, s) -> pf ppf "tf__.cast(%s, tf__.float64)" s
+  | FunApp (StanLib, f, obs :: dist_params)
+    when f = Transform_mir.dist_prefix ^ "CholeskyLKJ" ->
+      pf ppf "%s(@[<hov>(%a).shape[0], %a@]).log_prob(%a)" f pp_expr obs
+        (list ~sep:comma pp_expr) dist_params pp_expr obs
   | FunApp (StanLib, f, obs :: dist_params)
     when String.is_prefix ~prefix:Transform_mir.dist_prefix f ->
       pf ppf "%a.log_prob(%a)" pp_call (f, pp_expr, dist_params) pp_expr obs
@@ -24,15 +32,15 @@ let rec pp_expr ppf {Expr.Fixed.pattern; _} =
       ( Operator.of_string_opt f |> Option.value_exn |> pystring_of_operator
       , args )
     with
-    | op, [lhs; rhs] -> pf ppf "%a %s %a" pp_expr lhs op pp_expr rhs
-    | op, [unary] -> pf ppf "(%s%a)" op pp_expr unary
+    | op, [lhs; rhs] -> pf ppf "%a %s %a" pp_paren lhs op pp_paren rhs
+    | op, [unary] -> pf ppf "%s%a" op pp_paren unary
     | op, args ->
         raise_s [%message "Need to implement" op (args : Expr.Typed.t list)] )
   | FunApp (_, fname, args) -> pp_call ppf (fname, pp_expr, args)
   | TernaryIf (cond, iftrue, iffalse) ->
-      pf ppf "%a if %a else %a" pp_expr cond pp_expr iftrue pp_expr iffalse
-  | EAnd (a, b) -> pf ppf "%a and %a" pp_expr a pp_expr b
-  | EOr (a, b) -> pf ppf "%a or %a" pp_expr a pp_expr b
+      pf ppf "%a if %a else %a" pp_paren iftrue pp_paren cond pp_paren iffalse
+  | EAnd (a, b) -> pf ppf "%a and %a" pp_paren a pp_paren b
+  | EOr (a, b) -> pf ppf "%a or %a" pp_paren a pp_paren b
   | Indexed (_, indices) when List.exists ~f:is_multi_index indices ->
       (*
        TF indexing options:
@@ -42,19 +50,23 @@ let rec pp_expr ppf {Expr.Fixed.pattern; _} =
        * tf.strided_slice
 *)
       raise_s [%message "Multi-indices not supported yet"]
-  | Indexed (obj, indices) ->
-      let pp_indexed ppf = function
-        | [] -> ()
-        | indices -> pf ppf "[%a]" (list ~sep:comma (Index.pp pp_expr)) indices
-      in
-      pf ppf "%a%a" pp_expr obj pp_indexed indices
+  | Indexed (obj, indices) -> pf ppf "%a%a" pp_expr obj pp_indices indices
+
+and pp_indices ppf = function
+  | [] -> ()
+  | indices -> pf ppf "[%a]" (list ~sep:comma (Index.pp pp_expr)) indices
+
+and pp_paren ppf expr =
+  match expr.Expr.Fixed.pattern with
+  | TernaryIf _ | EAnd _ | EOr _ -> pf ppf "(%a)" pp_expr expr
+  | FunApp (StanLib, f, _) when Operator.of_string_opt f |> Option.is_some ->
+      pf ppf "(%a)" pp_expr expr
+  | _ -> pp_expr ppf expr
 
 let rec pp_stmt ppf s =
-  let fake_expr pattern = {Expr.Fixed.pattern; meta= Expr.Typed.Meta.empty} in
   match s.Stmt.Fixed.pattern with
   | Assignment ((lhs, _, indices), rhs) ->
-      let indexed = fake_expr (Indexed (fake_expr (Var lhs), indices)) in
-      pf ppf "%a = %a" pp_expr indexed pp_expr rhs
+      pf ppf "%s%a = %a" lhs pp_indices indices pp_expr rhs
   | TargetPE rhs -> pf ppf "target += tf__.reduce_sum(%a)" pp_expr rhs
   | NRFunApp (StanLib, f, args) | NRFunApp (UserDefined, f, args) ->
       pp_call ppf (f, pp_expr, args)
@@ -92,12 +104,34 @@ let pp_init ppf p =
   let pp_save_data ppf (name, st) =
     pf ppf "self.%s = %a" name (pp_cast "") (name, st)
   in
-  let ppbody ppf = (list ~sep:cut pp_save_data) ppf p.Program.input_vars in
+  let pp_prep_data_stmt ppf st = pf ppf "self.%a" pp_stmt st in
+  let ppbody ppf =
+    match p.Program.input_vars with
+    | [] -> pf ppf "pass"
+    | _ ->
+        pf ppf "@[<v>%a@,%a@]"
+          (list ~sep:cut pp_save_data)
+          p.Program.input_vars
+          (list ~sep:cut pp_prep_data_stmt)
+          p.Program.prepare_data
+  in
   pp_method ppf "__init__" ("self" :: List.map ~f:fst p.input_vars) [] ppbody
 
+let pp_var_assignment ppf s = pf ppf "%s = self.%s" s s
+
 let pp_extract_data ppf p =
-  let pp_data ppf (name, _) = pf ppf "%s = self.%s" name name in
-  (list ~sep:cut pp_data) ppf p.Program.input_vars
+  (list ~sep:cut pp_var_assignment) ppf (List.map ~f:fst p.Program.input_vars)
+
+let pp_extract_transf_data ppf p =
+  let extract_arg_names x =
+    match x.Stmt.Fixed.pattern with
+    | Assignment ((lhs, _, _), _) -> Some lhs
+    | _ -> None
+  in
+  let arg_names =
+    List.filter_map ~f:extract_arg_names p.Program.prepare_data
+  in
+  (list ~sep:cut pp_var_assignment) ppf arg_names
 
 let pp_log_prob_one_chain ppf p =
   let pp_extract_param ppf (idx, name) =
@@ -108,10 +142,11 @@ let pp_log_prob_one_chain ppf p =
     | _ -> []
   in
   let ppbody ppf =
-    pf ppf "%a@,%a@,%a" pp_extract_data p
+    pf ppf "@,%s@,%a@,@,%s@,%a@,@,%s@,%a@,@,%s@,%a" "# Data" pp_extract_data p
+      "# Transformed data" pp_extract_transf_data p "# Parameters"
       (list ~sep:cut pp_extract_param)
       List.(concat (mapi p.output_vars ~f:grab_params))
-      (list ~sep:cut pp_stmt) p.log_prob
+      "# Target log probability computation" (list ~sep:cut pp_stmt) p.log_prob
   in
   let intro = ["target = 0"] in
   let outro = ["return target"] in
@@ -142,12 +177,6 @@ let get_param_st p var =
   in
   st
 
-let rec get_dims = function
-  | SizedType.SInt | SReal -> []
-  | SVector d | SRowVector d -> [d]
-  | SMatrix (dim1, dim2) -> [dim1; dim2]
-  | SArray (t, dim) -> dim :: get_dims t
-
 let pp_log_prob ppf p =
   pf ppf "@ %a@ " pp_log_prob_one_chain p ;
   let intro =
@@ -162,8 +191,10 @@ let get_params p =
 
 let pp_shapes ppf p =
   let pp_shape ppf (_, {Program.out_unconstrained_st; _}) =
-    pf ppf "(nchains__, @[<hov>%a@])" (list ~sep:comma pp_expr)
-      (get_dims out_unconstrained_st)
+    let cast_expr ppf e = pf ppf "tf__.cast(%a, tf__.int32)" pp_expr e in
+    pf ppf "(nchains__, @[<hov>%a@])"
+      (list ~sep:comma cast_expr)
+      (SizedType.get_dims out_unconstrained_st)
   in
   let ppbody ppf =
     pf ppf "%a@ " pp_extract_data p ;
@@ -176,7 +207,15 @@ let pp_bijector ppf trans =
   let components =
     match trans with
     | Program.Identity -> []
-    | Lower lb -> [("Exp", []); ("AffineScalar", [lb])]
+    | Lower lb -> [("Exp", []); ("Shift", [lb])]
+    | Upper ub ->
+        [("Exp", []); ("Scale", [Expr.Helpers.float (-1.)]); ("Shift", [ub])]
+    | LowerUpper (lb, ub) -> [("Sigmoid", [lb; ub])]
+    | Offset o -> [("Shift", [o])]
+    | Multiplier m -> [("Scale", [m])]
+    | OffsetMultiplier (o, m) -> [("Scale", [m]); ("Shift", [o])]
+    | CholeskyCorr -> [("CorrelationCholesky", [])]
+    | Correlation -> [("CorrelationCholesky", []); ("CholeskyOuterProduct", [])]
     | _ ->
         raise_s
           [%message
@@ -233,11 +272,11 @@ from tensorflow.python.ops.parallel_for import pfor as pfor__
 |}
 
 let pp_prog ppf (p : Program.Typed.t) =
-  pf ppf "%s@,@,%a@,class %s(tfd__.Distribution):@,@[<v 2>%a@]" imports
+  pf ppf "@[<v>%s@,%a@,class %s(tfd__.Distribution):@,@[<v 2>%a@]@]" imports
     (list ~sep:cut pp_fundef) p.functions_block p.prog_name pp_methods p ;
   pf ppf "@ model = %s" p.prog_name
 
 (* Major work to do:
-1. Work awareness of distributions and bijectors into the type system
-2. Have backends present an environment that the frontend and middle can use for type checking and optimization.
+   1. Work awareness of distributions and bijectors into the type system
+   2. Have backends present an environment that the frontend and middle can use for type checking and optimization.
 *)

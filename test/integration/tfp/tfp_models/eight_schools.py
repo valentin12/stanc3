@@ -6,23 +6,34 @@ tfd__ = tfp__.distributions
 tfb__ = tfp__.bijectors
 from tensorflow.python.ops.parallel_for import pfor as pfor__
 
+
 class eight_schools_ncp_model(tfd__.Distribution):
 
   def __init__(self, J, y, sigma):
     self.J = J
     self.y = tf__.cast(y, tf__.float64)
     self.sigma = tf__.cast(sigma, tf__.float64)
+    
      
   
   def log_prob_one_chain(self, params):
     target = 0
+    
+    # Data
     J = self.J
     y = self.y
     sigma = self.sigma
+    
+    # Transformed data
+    
+    
+    # Parameters
     mu = tf__.cast(params[0], tf__.float64)
     tau = tf__.cast(params[1], tf__.float64)
     theta_tilde = tf__.cast(params[2], tf__.float64)
-    theta = mu + tau * theta_tilde
+    
+    # Target log probability computation
+    theta = mu + (tau * theta_tilde)
     target += tf__.reduce_sum(tfd__.Normal(tf__.cast(0, tf__.float64),
                                            tf__.cast(5, tf__.float64)).log_prob(mu))
     target += tf__.reduce_sum(tfd__.Normal(tf__.cast(0, tf__.float64),
@@ -40,15 +51,16 @@ class eight_schools_ncp_model(tfd__.Distribution):
     J = self.J
     y = self.y
     sigma = self.sigma
-    return [(nchains__, ), (nchains__, ), (nchains__, J)]
+    return [(nchains__, ), (nchains__, ),
+            (nchains__, tf__.cast(J, tf__.int32))]
      
   def parameter_bijectors(self):
     J = self.J
     y = self.y
     sigma = self.sigma
     return [tfb__.Identity(),
-            tfb__.Chain([tfb__.AffineScalar(tf__.cast(0, tf__.float64)),
-                         tfb__.Exp()]), tfb__.Identity()]
+            tfb__.Chain([tfb__.Shift(tf__.cast(0, tf__.float64)), tfb__.Exp()]),
+            tfb__.Identity()]
      
   def parameter_names(self):
     return ["mu", "tau", "theta_tilde"]

@@ -131,7 +131,7 @@ module Labelled = struct
       Label.Int_label.Map.add ~key:(label_of expr) ~data:expr
         (associate_pattern assocs @@ pattern)
     in
-    match assocs_result with `Ok x -> x | _ -> assocs
+    match assocs_result with `Ok x -> x | `Duplicate -> assocs
 
   and associate_pattern assocs = function
     | Fixed.Pattern.Lit _ | Var _ -> assocs
@@ -154,6 +154,10 @@ module Helpers = struct
   let int i =
     {Fixed.meta= Typed.Meta.empty; pattern= Lit (Int, string_of_int i)}
 
+  let float i =
+    {Fixed.meta= Typed.Meta.empty; pattern= Lit (Real, string_of_float i)}
+
+  let str i = {Fixed.meta= Typed.Meta.empty; pattern= Lit (Str, i)}
   let zero = int 0
   let one = int 1
 

@@ -6,38 +6,48 @@ open Expression_gen
 let pp_call_str ppf (name, args) = pp_call ppf (name, string, args)
 let pp_block ppf (pp_body, body) = pf ppf "{@;<1 2>@[<v>%a@]@,}" pp_body body
 
+let rec contains_eigen = function
+  | UnsizedType.UArray t -> contains_eigen t
+  | UMatrix | URowVector | UVector -> true
+  | UInt | UReal | UMathLibraryFunction | UFun _ -> false
+
 let pp_set_size ppf (decl_id, st, adtype) =
   (* TODO: generate optimal adtypes for expressions and declarations *)
+  let real_nan =
+    match adtype with
+    | UnsizedType.AutoDiffable -> "DUMMY_VAR__"
+    | DataOnly -> "std::numeric_limits<double>::quiet_NaN()"
+  in
   let rec pp_size_ctor ppf st =
     let pp_st ppf st =
       pf ppf "%a" pp_unsizedtype_local (adtype, SizedType.to_unsized st)
     in
     match st with
-    | SizedType.SInt | SReal -> pf ppf "0"
+    | SizedType.SInt -> pf ppf "std::numeric_limits<int>::min()"
+    | SReal -> pf ppf "%s" real_nan
     | SVector d | SRowVector d -> pf ppf "%a(%a)" pp_st st pp_expr d
     | SMatrix (d1, d2) -> pf ppf "%a(%a, %a)" pp_st st pp_expr d1 pp_expr d2
     | SArray (t, d) -> pf ppf "%a(%a, %a)" pp_st st pp_expr d pp_size_ctor t
   in
-  match st with
-  | SizedType.SInt | SReal -> ()
-  | st -> pf ppf "@[<hov 2>%s = %a;@]@," decl_id pp_size_ctor st
+  pf ppf "@[<hov 2>%s = %a;@]@," decl_id pp_size_ctor st ;
+  if contains_eigen (SizedType.to_unsized st) then
+    pf ppf "@[<hov 2>stan::math::fill(%s, %s);@]@," decl_id real_nan
 
 let%expect_test "set size mat array" =
-  let int i =
-    { Expr.Fixed.pattern= Lit (Int, string_of_int i)
-    ; meta= Expr.Typed.Meta.empty }
-  in
+  let int = Expr.Helpers.int in
   strf "@[<v>%a@]" pp_set_size
     ("d", SArray (SArray (SMatrix (int 2, int 3), int 4), int 5), DataOnly)
   |> print_endline ;
   [%expect
-    {| d = std::vector<std::vector<Eigen::Matrix<double, -1, -1>>>(5, std::vector<Eigen::Matrix<double, -1, -1>>(4, Eigen::Matrix<double, -1, -1>(2, 3))); |}]
+    {|
+      d = std::vector<std::vector<Eigen::Matrix<double, -1, -1>>>(5, std::vector<Eigen::Matrix<double, -1, -1>>(4, Eigen::Matrix<double, -1, -1>(2, 3)));
+      stan::math::fill(d, std::numeric_limits<double>::quiet_NaN()); |}]
 
 (** [pp_for_loop ppf (loopvar, lower, upper, pp_body, body)] tries to
     pretty print a for-loop from lower to upper given some loopvar.*)
 let pp_for_loop ppf (loopvar, lower, upper, pp_body, body) =
-  pf ppf "@[<hov>for (@[<hov>size_t %s = %a;@ %s <= %a;@ ++%s@])" loopvar
-    pp_expr lower loopvar pp_expr upper loopvar ;
+  pf ppf "@[<hov>for (@[<hov>int %s = %a;@ %s <= %a;@ ++%s@])" loopvar pp_expr
+    lower loopvar pp_expr upper loopvar ;
   pf ppf " %a@]" pp_body body
 
 let rec integer_el_type = function
@@ -67,6 +77,9 @@ let pp_possibly_sized_decl ppf (vident, pst, adtype) =
 
 let math_fn_translations = function
   | Internal_fun.FnLength -> Some ("length", [])
+  | FnValidateSize -> Some ("validate_non_negative_index", [])
+  | FnValidateSizeSimplex -> Some ("validate_positive_index", [])
+  | FnValidateSizeUnitVector -> Some ("validate_unit_vector_index", [])
   | _ -> None
 
 let trans_math_fn fname =
@@ -91,10 +104,6 @@ let rec pp_statement (ppf : Format.formatter)
       ((vident, _, []), ({meta= Expr.Typed.Meta.({type_= UInt; _}); _} as rhs))
    |Assignment ((vident, _, []), ({meta= {type_= UReal; _}; _} as rhs)) ->
       pf ppf "@[<hov 4>%s = %a;@]" vident pp_expr rhs
-  | Assignment
-      ((id, _, idcs), ({pattern= FunApp (CompilerInternal, f, _); _} as rhs))
-    when Internal_fun.of_string_opt f = Some FnMakeArray ->
-      pf ppf "@[<hov 4>%a = %a;@]" pp_indexed_simple (id, idcs) pp_expr rhs
   | Assignment ((assignee, UInt, idcs), rhs)
    |Assignment ((assignee, UReal, idcs), rhs)
     when List.for_all ~f:is_single_index idcs ->
@@ -137,9 +146,7 @@ let rec pp_statement (ppf : Format.formatter)
   | NRFunApp (CompilerInternal, fname, args)
     when fname = Internal_fun.to_string FnPrint ->
       let pp_arg ppf a = pf ppf "stan_print(pstream__, %a);" pp_expr a in
-      let args =
-        args @ [{pattern= Lit (Str, "\n"); meta= Expr.Typed.Meta.empty}]
-      in
+      let args = args @ [Expr.Helpers.str "\n"] in
       pf ppf "if (pstream__) %a" pp_block (list ~sep:cut pp_arg, args)
   | NRFunApp (CompilerInternal, fname, args)
     when fname = Internal_fun.to_string FnReject ->
@@ -160,7 +167,7 @@ let rec pp_statement (ppf : Format.formatter)
         ; meta= stmt.meta }
   | NRFunApp (CompilerInternal, fname, [var])
     when fname = Internal_fun.to_string FnWriteParam ->
-      pf ppf "@[<hov 2>vars__.push_back(@,%a);@]" pp_expr var
+      pf ppf "@[<hov 2>vars__.emplace_back(@,%a);@]" pp_expr var
   | NRFunApp (CompilerInternal, fname, args) ->
       let fname, extra_args = trans_math_fn fname in
       pf ppf "%s(@[<hov>%a@]);" fname (list ~sep:comma pp_expr)
