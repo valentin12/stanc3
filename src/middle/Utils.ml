@@ -16,7 +16,8 @@ let is_user_ident = Fn.non (String.is_suffix ~suffix:"__")
 let is_distribution_name s =
   (not
      ( String.is_suffix s ~suffix:"_cdf_log"
-     || String.is_suffix s ~suffix:"_ccdf_log" ))
+     || String.is_suffix s ~suffix:"_ccdf_log"
+     || String.equal s "laplace_marginal_poisson_log"))
   && List.exists
        ~f:(fun suffix -> String.is_suffix s ~suffix)
        distribution_suffices
