@@ -190,6 +190,17 @@ let distributions =
   ; ([Lpdf], "wiener", [DVReal; DVReal; DVReal; DVReal; DVReal])
   ; ([Lpdf], "wishart", [DMatrix; DReal; DMatrix]) ]
 
+  (*; ([Lpmf], "lapalce_marginal_poisson_log",
+    [ (DataOnly, UArray UInt); (DataOnly, UArray UInt)
+  ; ( AutoDiffable
+    , UFun
+        ( [ (AutoDiffable, UVector); (DataOnly, UArray UVector)
+          ; (DataOnly, UArray UReal); (DataOnly, UArray UInt) ]
+        , ReturnType UMatrix ) )
+  ; (AutoDiffable, UVector); (DataOnly, UArray UVector)
+  ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
+  ; (AutoDiffable, UVector) ]) ] *)
+
 let math_sigs =
   [ ([UnaryVectorized], "acos", [DDeepVectorized])
   ; ([UnaryVectorized], "acosh", [DDeepVectorized])
