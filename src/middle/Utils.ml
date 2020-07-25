@@ -17,7 +17,8 @@ let is_distribution_name s =
   (not
      ( String.is_suffix s ~suffix:"_cdf_log"
      || String.is_suffix s ~suffix:"_ccdf_log"
-     || String.equal s "laplace_marginal_poisson_log_lpmf"))
+     || String.equal s "laplace_marginal_poisson_log_lpmf"
+     || String.equal s "laplace_marginal_bernoulli_logit_lpmf"))
   && List.exists
        ~f:(fun suffix -> String.is_suffix s ~suffix)
        distribution_suffices
