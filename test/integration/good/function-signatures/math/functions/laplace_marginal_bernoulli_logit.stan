@@ -30,11 +30,11 @@ parameters {
 
 model {
   target +=
-    laplace_marginal_bernoulli_logit(y, n_samples, K, phi, x, delta, delta_int,
-                               theta0);
+    laplace_marginal_bernoulli_logit_lpmf(y | n_samples, K, phi, x, delta,
+                                          delta_int, theta0);
   target +=
-    laplace_marginal_bernoulli_logit(y, n_samples, Km, phi, x_m, delta, delta_int,
-                               theta0);
+    laplace_marginal_bernoulli_logit_lpmf(y | n_samples, Km, phi, x_m, delta,
+                                          delta_int, theta0);
 }
 
 generated quantities {

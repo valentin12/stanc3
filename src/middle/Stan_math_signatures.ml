@@ -190,6 +190,7 @@ let distributions =
   ; ([Lpdf], "wiener", [DVReal; DVReal; DVReal; DVReal; DVReal])
   ; ([Lpdf], "wishart", [DMatrix; DReal; DMatrix]) ]
 
+  (* Broken code: will edit to add ~ statement *)
   (*; ([Lpmf], "lapalce_marginal_poisson_log",
     [ (DataOnly, UArray UInt); (DataOnly, UArray UInt)
   ; ( AutoDiffable
@@ -1546,7 +1547,7 @@ let () =
   add_unqualified ("wishart_rng", ReturnType UMatrix, [UReal; UMatrix]) ;
   (* Embedded Laplace approximation *)
   add_qualified
-    ( "laplace_marginal_bernoulli_logit"
+    ( "laplace_marginal_bernoulli_logit_lpmf"
     , ReturnType UReal
     , [ (DataOnly, UArray UInt); (DataOnly, UArray UInt)
       ; ( AutoDiffable
@@ -1558,7 +1559,7 @@ let () =
       ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
       ; (AutoDiffable, UVector) ] ) ;
   add_qualified
-    ( "laplace_marginal_bernoulli_logit"
+    ( "laplace_marginal_bernoulli_logit_lpmf"
     , ReturnType UReal
     , [ (DataOnly, UArray UInt); (DataOnly, UArray UInt)
       ; ( AutoDiffable
@@ -1570,7 +1571,7 @@ let () =
       ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
       ; (AutoDiffable, UVector); (DataOnly, UReal); (DataOnly, UInt) ] ) ;
   add_qualified
-    ( "laplace_marginal_bernoulli_logit"
+    ( "laplace_marginal_bernoulli_logit_lpmf"
     , ReturnType UReal
     , [ (DataOnly, UArray UInt); (DataOnly, UArray UInt)
       ; ( AutoDiffable
