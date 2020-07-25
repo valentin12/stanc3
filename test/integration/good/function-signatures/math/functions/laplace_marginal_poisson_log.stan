@@ -25,12 +25,17 @@ parameters {
 
 model {
   target +=
-    laplace_marginal_poisson_log(y, n_samples, K, phi, x, delta, delta_int,
+    laplace_marginal_poisson_log_lpmf(y | n_samples, K, phi, x, delta, delta_int,
+                                 theta0);
+  target +=
+    laplace_marginal_poisson_log_lpmf(y | n_samples, ye, K, phi, x, delta, delta_int,
                                  theta0);
 
-  target +=
-    laplace_marginal_poisson_log(y, n_samples, ye, K, phi, x, delta, delta_int,
-                                 theta0);
+  y ~ laplace_marginal_poisson_log(n_samples, K, phi, x, delta, delta_int,
+                                   theta0);
+
+  y ~ laplace_marginal_poisson_log(n_samples, ye, K, phi, x, delta, delta_int,
+                                   theta0);
 }
 
 generated quantities {

@@ -1597,7 +1597,7 @@ let () =
             ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
             ; (AutoDiffable, UVector) ] ) ;
   add_qualified
-    ( "laplace_marginal_poisson_log"
+    ( "laplace_marginal_poisson_log_lpmf"
     , ReturnType UReal
     , [ (DataOnly, UArray UInt); (DataOnly, UArray UInt)
       ; ( AutoDiffable
@@ -1609,7 +1609,7 @@ let () =
       ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
       ; (AutoDiffable, UVector) ] ) ;
   add_qualified
-    ( "laplace_marginal_poisson_log"
+    ( "laplace_marginal_poisson_log_lpmf"
     , ReturnType UReal
     , [ (DataOnly, UArray UInt); (DataOnly, UArray UInt)
       ; (DataOnly, UVector)
