@@ -171,7 +171,7 @@ let rec pp_statement (ppf : Format.formatter)
               , "profile<local_scalar_t__>"
               , args
                 @ [ Expr.Fixed.
-                      { pattern= Lit (Int, "profiles")
+                      { pattern= Lit (Int, "profiles__")
                       ; meta=
                           Expr.Typed.Meta.
                             { type_= UInt

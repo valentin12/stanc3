@@ -12,7 +12,10 @@ parameters {
   real<lower=0> alpha;
   real<lower=0> sigma;
 }
-
+transformed parameters {
+   profile("transformed parameters", 1);
+   matrix[N, N] cov1 = gp_exp_quad_cov(x, alpha, rho);
+}
 model {
    matrix[N, N] cov;
    matrix[N, N] L_cov;

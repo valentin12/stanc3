@@ -57,7 +57,7 @@ using stan::model::nil_index_list;
 using namespace stan::math;
 using stan::math::pow; 
 
-profile_map profiles;
+profile_map profiles__;
 
 
 static int current_statement__ = 0;
@@ -65,31 +65,35 @@ static const std::vector<string> locations_array__ = {" (found before start of p
                                                       " (in 'simple_function.stan', line 11, column 2 to column 20)",
                                                       " (in 'simple_function.stan', line 12, column 2 to column 22)",
                                                       " (in 'simple_function.stan', line 13, column 2 to column 22)",
-                                                      " (in 'simple_function.stan', line 17, column 10 to column 11)",
-                                                      " (in 'simple_function.stan', line 17, column 13 to column 14)",
-                                                      " (in 'simple_function.stan', line 17, column 3 to column 20)",
-                                                      " (in 'simple_function.stan', line 18, column 10 to column 11)",
-                                                      " (in 'simple_function.stan', line 18, column 13 to column 14)",
-                                                      " (in 'simple_function.stan', line 18, column 3 to column 22)",
-                                                      " (in 'simple_function.stan', line 20, column 6 to column 30)",
-                                                      " (in 'simple_function.stan', line 21, column 6 to line 22, column 60)",
-                                                      " (in 'simple_function.stan', line 19, column 3 to line 23, column 4)",
-                                                      " (in 'simple_function.stan', line 25, column 6 to column 36)",
-                                                      " (in 'simple_function.stan', line 26, column 6 to column 38)",
-                                                      " (in 'simple_function.stan', line 24, column 3 to line 27, column 4)",
-                                                      " (in 'simple_function.stan', line 29, column 6 to column 39)",
-                                                      " (in 'simple_function.stan', line 30, column 6 to column 25)",
-                                                      " (in 'simple_function.stan', line 31, column 6 to column 27)",
-                                                      " (in 'simple_function.stan', line 32, column 6 to column 27)",
-                                                      " (in 'simple_function.stan', line 34, column 6 to column 57)",
-                                                      " (in 'simple_function.stan', line 28, column 3 to line 35, column 4)",
+                                                      " (in 'simple_function.stan', line 17, column 3 to column 54)",
+                                                      " (in 'simple_function.stan', line 16, column 3 to column 40)",
+                                                      " (in 'simple_function.stan', line 20, column 10 to column 11)",
+                                                      " (in 'simple_function.stan', line 20, column 13 to column 14)",
+                                                      " (in 'simple_function.stan', line 20, column 3 to column 20)",
+                                                      " (in 'simple_function.stan', line 21, column 10 to column 11)",
+                                                      " (in 'simple_function.stan', line 21, column 13 to column 14)",
+                                                      " (in 'simple_function.stan', line 21, column 3 to column 22)",
+                                                      " (in 'simple_function.stan', line 23, column 6 to column 30)",
+                                                      " (in 'simple_function.stan', line 24, column 6 to line 25, column 60)",
+                                                      " (in 'simple_function.stan', line 22, column 3 to line 26, column 4)",
+                                                      " (in 'simple_function.stan', line 28, column 6 to column 36)",
+                                                      " (in 'simple_function.stan', line 29, column 6 to column 38)",
+                                                      " (in 'simple_function.stan', line 27, column 3 to line 30, column 4)",
+                                                      " (in 'simple_function.stan', line 32, column 6 to column 39)",
+                                                      " (in 'simple_function.stan', line 33, column 6 to column 25)",
+                                                      " (in 'simple_function.stan', line 34, column 6 to column 27)",
+                                                      " (in 'simple_function.stan', line 35, column 6 to column 27)",
+                                                      " (in 'simple_function.stan', line 37, column 6 to column 57)",
+                                                      " (in 'simple_function.stan', line 31, column 3 to line 38, column 4)",
                                                       " (in 'simple_function.stan', line 2, column 2 to column 17)",
                                                       " (in 'simple_function.stan', line 3, column 9 to column 10)",
                                                       " (in 'simple_function.stan', line 3, column 2 to column 12)",
                                                       " (in 'simple_function.stan', line 4, column 9 to column 10)",
                                                       " (in 'simple_function.stan', line 4, column 2 to column 14)",
                                                       " (in 'simple_function.stan', line 7, column 3 to column 20)",
-                                                      " (in 'simple_function.stan', line 8, column 3 to column 23)"};
+                                                      " (in 'simple_function.stan', line 8, column 3 to column 23)",
+                                                      " (in 'simple_function.stan', line 17, column 10 to column 11)",
+                                                      " (in 'simple_function.stan', line 17, column 13 to column 14)"};
 
 
 
@@ -106,7 +110,7 @@ class simple_function_model final : public model_base_crtp<simple_function_model
   
   inline std::string model_name() const final { return "simple_function_model"; }
   inline profile_map get_profile() {
-    return profiles;
+    return profiles__;
   }
     
 
@@ -132,29 +136,29 @@ class simple_function_model final : public model_base_crtp<simple_function_model
       pos__ = std::numeric_limits<int>::min();
       
       pos__ = 1;
-      current_statement__ = 22;
+      current_statement__ = 24;
       context__.validate_dims("data initialization","N","int",
           context__.to_vec());
       N = std::numeric_limits<int>::min();
       
-      current_statement__ = 22;
-      N = context__.vals_i("N")[(1 - 1)];
-      current_statement__ = 22;
-      current_statement__ = 22;
-      check_greater_or_equal(function__, "N", N, 1);
-      current_statement__ = 23;
-      validate_non_negative_index("x", "N", N);
       current_statement__ = 24;
+      N = context__.vals_i("N")[(1 - 1)];
+      current_statement__ = 24;
+      current_statement__ = 24;
+      check_greater_or_equal(function__, "N", N, 1);
+      current_statement__ = 25;
+      validate_non_negative_index("x", "N", N);
+      current_statement__ = 26;
       context__.validate_dims("data initialization","x","double",
           context__.to_vec(N));
       x = std::vector<double>(N, std::numeric_limits<double>::quiet_NaN());
       
-      current_statement__ = 24;
+      current_statement__ = 26;
       assign(x, nil_index_list(), context__.vals_r("x"),
         "assigning variable x");
-      current_statement__ = 25;
+      current_statement__ = 27;
       validate_non_negative_index("y", "N", N);
-      current_statement__ = 26;
+      current_statement__ = 28;
       context__.validate_dims("data initialization","y","double",
           context__.to_vec(N));
       y = Eigen::Matrix<double, -1, 1>(N);
@@ -162,27 +166,31 @@ class simple_function_model final : public model_base_crtp<simple_function_model
       
       {
         std::vector<local_scalar_t__> y_flat__;
-        current_statement__ = 26;
+        current_statement__ = 28;
         assign(y_flat__, nil_index_list(), context__.vals_r("y"),
           "assigning variable y_flat__");
-        current_statement__ = 26;
+        current_statement__ = 28;
         pos__ = 1;
-        current_statement__ = 26;
+        current_statement__ = 28;
         for (int sym1__ = 1; sym1__ <= N; ++sym1__) {
-          current_statement__ = 26;
+          current_statement__ = 28;
           assign(y, cons_list(index_uni(sym1__), nil_index_list()),
             y_flat__[(pos__ - 1)], "assigning variable y");
-          current_statement__ = 26;
+          current_statement__ = 28;
           pos__ = (pos__ + 1);}
       }
-      current_statement__ = 27;
+      current_statement__ = 29;
       profile<local_scalar_t__> profile_0__ = profile<local_scalar_t__>(
-                                                "tdata", profiles);
-      current_statement__ = 28;
+                                                "tdata", profiles__);
+      current_statement__ = 30;
       sum_y = std::numeric_limits<double>::quiet_NaN();
       
-      current_statement__ = 28;
+      current_statement__ = 30;
       sum_y = sum(y);
+      current_statement__ = 31;
+      validate_non_negative_index("cov1", "N", N);
+      current_statement__ = 32;
+      validate_non_negative_index("cov1", "N", N);
     } catch (const std::exception& e) {
       stan::lang::rethrow_located(e, locations_array__[current_statement__]);
       // Next line prevents compiler griping about no return
@@ -256,53 +264,65 @@ class simple_function_model final : public model_base_crtp<simple_function_model
         current_statement__ = 3;
         sigma = stan::math::lb_constrain(sigma, 0);
       }
+      current_statement__ = 5;
+      profile<local_scalar_t__> profile_1__ = profile<local_scalar_t__>(
+                                                "transformed parameters", 1,
+                                                profiles__);
+      Eigen::Matrix<local_scalar_t__, -1, -1> cov1;
+      cov1 = Eigen::Matrix<local_scalar_t__, -1, -1>(N, N);
+      stan::math::fill(cov1, DUMMY_VAR__);
+      
+      current_statement__ = 4;
+      assign(cov1, nil_index_list(), gp_exp_quad_cov(x, alpha, rho),
+        "assigning variable cov1");
       {
-        current_statement__ = 4;
+        current_statement__ = 6;
         validate_non_negative_index("cov", "N", N);
-        current_statement__ = 5;
+        current_statement__ = 7;
         validate_non_negative_index("cov", "N", N);
         Eigen::Matrix<local_scalar_t__, -1, -1> cov;
         cov = Eigen::Matrix<local_scalar_t__, -1, -1>(N, N);
         stan::math::fill(cov, DUMMY_VAR__);
         
-        current_statement__ = 7;
+        current_statement__ = 9;
         validate_non_negative_index("L_cov", "N", N);
-        current_statement__ = 8;
+        current_statement__ = 10;
         validate_non_negative_index("L_cov", "N", N);
         Eigen::Matrix<local_scalar_t__, -1, -1> L_cov;
         L_cov = Eigen::Matrix<local_scalar_t__, -1, -1>(N, N);
         stan::math::fill(L_cov, DUMMY_VAR__);
         
         {
-          current_statement__ = 10;
-          profile<local_scalar_t__> profile_1__ = profile<local_scalar_t__>(
-                                                    "cov_exp_quad", profiles);
-          current_statement__ = 11;
+          current_statement__ = 12;
+          profile<local_scalar_t__> profile_2__ = profile<local_scalar_t__>(
+                                                    "cov_exp_quad",
+                                                    profiles__);
+          current_statement__ = 13;
           assign(cov, nil_index_list(),
             add(gp_exp_quad_cov(x, alpha, rho),
               diag_matrix(rep_vector(sigma, N))), "assigning variable cov");
         }
         {
-          current_statement__ = 13;
-          profile<local_scalar_t__> profile_2__ = profile<local_scalar_t__>(
+          current_statement__ = 15;
+          profile<local_scalar_t__> profile_3__ = profile<local_scalar_t__>(
                                                     "cholesky_decompose",
-                                                    profiles);
-          current_statement__ = 14;
+                                                    profiles__);
+          current_statement__ = 16;
           assign(L_cov, nil_index_list(), cholesky_decompose(cov),
             "assigning variable L_cov");
         }
         {
-          current_statement__ = 16;
-          profile<local_scalar_t__> profile_3__ = profile<local_scalar_t__>(
-                                                    "multi_normal_cholesky",
-                                                    profiles);
-          current_statement__ = 17;
-          lp_accum__.add(gamma_lpdf<propto__>(rho, 25, 4));
           current_statement__ = 18;
-          lp_accum__.add(normal_lpdf<propto__>(alpha, 0, 2));
+          profile<local_scalar_t__> profile_4__ = profile<local_scalar_t__>(
+                                                    "multi_normal_cholesky",
+                                                    profiles__);
           current_statement__ = 19;
-          lp_accum__.add(normal_lpdf<propto__>(sigma, 0, 1));
+          lp_accum__.add(gamma_lpdf<propto__>(rho, 25, 4));
           current_statement__ = 20;
+          lp_accum__.add(normal_lpdf<propto__>(alpha, 0, 2));
+          current_statement__ = 21;
+          lp_accum__.add(normal_lpdf<propto__>(sigma, 0, 1));
+          current_statement__ = 22;
           lp_accum__.add(
             multi_normal_cholesky_lpdf<propto__>(y, rep_vector(0, N), L_cov));
         }
@@ -359,12 +379,32 @@ class simple_function_model final : public model_base_crtp<simple_function_model
       sigma = in__.scalar();
       current_statement__ = 3;
       sigma = stan::math::lb_constrain(sigma, 0);
+      Eigen::Matrix<double, -1, -1> cov1;
+      cov1 = Eigen::Matrix<double, -1, -1>(N, N);
+      stan::math::fill(cov1, std::numeric_limits<double>::quiet_NaN());
+      
       vars__.emplace_back(rho);
       vars__.emplace_back(alpha);
       vars__.emplace_back(sigma);
       if (logical_negation((primitive_value(emit_transformed_parameters__) ||
             primitive_value(emit_generated_quantities__)))) {
         return ;
+      } 
+      current_statement__ = 5;
+      profile<local_scalar_t__> profile_5__ = profile<local_scalar_t__>(
+                                                "transformed parameters", 1,
+                                                profiles__);
+      current_statement__ = 4;
+      assign(cov1, nil_index_list(), gp_exp_quad_cov(x, alpha, rho),
+        "assigning variable cov1");
+      if (emit_transformed_parameters__) {
+        for (int sym1__ = 1; sym1__ <= N; ++sym1__) {
+          for (int sym2__ = 1; sym2__ <= N; ++sym2__) {
+            vars__.emplace_back(
+              rvalue(cov1,
+                cons_list(index_uni(sym2__),
+                  cons_list(index_uni(sym1__), nil_index_list())), "cov1"));}
+        }
       } 
       if (logical_negation(emit_generated_quantities__)) {
         return ;
@@ -435,6 +475,7 @@ class simple_function_model final : public model_base_crtp<simple_function_model
     names__.emplace_back("rho");
     names__.emplace_back("alpha");
     names__.emplace_back("sigma");
+    names__.emplace_back("cov1");
     } // get_param_names() 
     
   inline void get_dims(std::vector<std::vector<size_t>>& dimss__) const {
@@ -444,6 +485,9 @@ class simple_function_model final : public model_base_crtp<simple_function_model
     dimss__.emplace_back(std::vector<size_t>{});
     
     dimss__.emplace_back(std::vector<size_t>{});
+    
+    dimss__.emplace_back(std::vector<size_t>{static_cast<size_t>(N),
+                                             static_cast<size_t>(N)});
     
     } // get_dims() 
     
@@ -457,7 +501,13 @@ class simple_function_model final : public model_base_crtp<simple_function_model
     param_names__.emplace_back(std::string() + "alpha");
     param_names__.emplace_back(std::string() + "sigma");
     if (emit_transformed_parameters__) {
-      
+      for (int sym1__ = 1; sym1__ <= N; ++sym1__) {
+        {
+          for (int sym2__ = 1; sym2__ <= N; ++sym2__) {
+            {
+              param_names__.emplace_back(std::string() + "cov1" + '.' + std::to_string(sym2__) + '.' + std::to_string(sym1__));
+            }}
+        }}
     }
     
     if (emit_generated_quantities__) {
@@ -476,7 +526,13 @@ class simple_function_model final : public model_base_crtp<simple_function_model
     param_names__.emplace_back(std::string() + "alpha");
     param_names__.emplace_back(std::string() + "sigma");
     if (emit_transformed_parameters__) {
-      
+      for (int sym1__ = 1; sym1__ <= N; ++sym1__) {
+        {
+          for (int sym2__ = 1; sym2__ <= N; ++sym2__) {
+            {
+              param_names__.emplace_back(std::string() + "cov1" + '.' + std::to_string(sym2__) + '.' + std::to_string(sym1__));
+            }}
+        }}
     }
     
     if (emit_generated_quantities__) {
@@ -487,13 +543,13 @@ class simple_function_model final : public model_base_crtp<simple_function_model
     
   inline std::string get_constrained_sizedtypes() const {
     stringstream s__;
-    s__ << "[{\"name\":\"rho\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"alpha\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"}]";
+    s__ << "[{\"name\":\"rho\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"alpha\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"cov1\",\"type\":{\"name\":\"matrix\",\"rows\":" << N << ",\"cols\":" << N << "},\"block\":\"transformed_parameters\"}]";
     return s__.str();
     } // get_constrained_sizedtypes() 
     
   inline std::string get_unconstrained_sizedtypes() const {
     stringstream s__;
-    s__ << "[{\"name\":\"rho\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"alpha\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"}]";
+    s__ << "[{\"name\":\"rho\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"alpha\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"cov1\",\"type\":{\"name\":\"matrix\",\"rows\":" << N << ",\"cols\":" << N << "},\"block\":\"transformed_parameters\"}]";
     return s__.str();
     } // get_unconstrained_sizedtypes() 
     

@@ -691,7 +691,7 @@ atomic_statement:
     {  grammar_logger "print_statement" ; Print l }
   | REJECT LPAREN l=printables RPAREN SEMICOLON
     {  grammar_logger "reject_statement" ; Reject l  }
-  | PROFILE LPAREN l=printables RPAREN SEMICOLON
+  | PROFILE LPAREN l=string_literal RPAREN SEMICOLON
     {  grammar_logger "profile_statement" ; Profile l }
   | RETURN e=expression SEMICOLON
     {  grammar_logger "return_statement" ; Return e }

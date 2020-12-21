@@ -797,7 +797,7 @@ let pp_model ppf ({Program.prog_name; _} as p) =
   pf ppf
     {|
   inline profile_map get_profile() {
-    return profiles;
+    return profiles__;
   }
     |} ;
   pf ppf
@@ -833,7 +833,7 @@ using stan::model::nil_index_list;
 using namespace stan::math;
 using stan::math::pow; 
 
-profile_map profiles;
+profile_map profiles__;
 |}
 
 (** Functions needed in the model class not defined yet in stan math.

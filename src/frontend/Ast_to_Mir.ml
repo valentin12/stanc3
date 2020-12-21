@@ -609,7 +609,7 @@ let rec trans_stmt ud_dists (declc : decl_context) (ts : Ast.typed_statement) =
       NRFunApp
         ( CompilerInternal
         , Internal_fun.to_string FnProfile
-        , trans_printables smeta ps )
+        , smeta ps )
       |> swrap
   | Ast.IfThenElse (cond, ifb, elseb) ->
       IfElse
