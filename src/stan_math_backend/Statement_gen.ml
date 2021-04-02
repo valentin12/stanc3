@@ -6,6 +6,15 @@ open Expression_gen
 let pp_call_str ppf (name, args) = pp_call ppf (name, string, args)
 let pp_block ppf (pp_body, body) = pf ppf "{@;<1 2>@[<v>%a@]@,}" pp_body body
 
+let pp_profile ppf (pp_body, name, body) =
+  let profile =
+    Fmt.strf
+      "profile<local_scalar_t__> profile__(%s, \
+       const_cast<profile_map&>(profiles__));"
+      name
+  in
+  pf ppf "{@;<1 2>@[<v>%s@;@;%a@]@,}" profile pp_body body
+
 let rec contains_eigen = function
   | UnsizedType.UArray t -> contains_eigen t
   | UMatrix | URowVector | UVector -> true
@@ -57,11 +66,10 @@ let rec integer_el_type = function
 
 let pp_decl ppf (vident, ut, adtype) =
   let pp_type =
-    if Transform_Mir.is_opencl_var vident then fun ppf _ ->
-      match ut with
-      | UnsizedType.UInt | UArray UInt -> pf ppf "matrix_cl<int>"
-      | _ -> pf ppf "matrix_cl<double>"
-    else pp_unsizedtype_local
+    match (Transform_Mir.is_opencl_var vident, ut) with
+    | _, UnsizedType.(UInt | UReal) | false, _ -> pp_unsizedtype_local
+    | true, UArray UInt -> fun ppf _ -> pf ppf "matrix_cl<int>"
+    | true, _ -> fun ppf _ -> pf ppf "matrix_cl<double>"
   in
   pf ppf "%a %s;" pp_type (adtype, ut) vident
 
@@ -137,11 +145,10 @@ let rec pp_statement (ppf : Format.formatter)
             rhs
         | _ -> maybe_deep_copy rhs
       in
-      pf ppf "@[<hov 2>assign(@,%s,@ %a,@ %a,@ %S@]);" assignee pp_indexes idcs
-        pp_expr rhs
-        (strf "assigning variable %s"
-           assignee
-           (* (list ~sep:comma (Pretty.pp_index Pretty.pp_expr_typed_located)) idcs *))
+      pf ppf "@[<hov 2>assign(@,%s,@ %a,@ %S%s%a@]);" assignee pp_expr rhs
+        (strf "assigning variable %s" assignee)
+        (if List.length idcs = 0 then "" else ", ")
+        pp_indexes idcs
   | TargetPE e -> pf ppf "@[<hov 2>lp_accum__.add(@,%a@]);" pp_expr e
   | NRFunApp (CompilerInternal, fname, args)
     when fname = Internal_fun.to_string FnPrint ->
@@ -196,6 +203,7 @@ let rec pp_statement (ppf : Format.formatter)
       (* Skip For loop part, just emit body due to the way FnReadParam emits *)
   | For {loopvar; lower; upper; body} ->
       pp_for_loop ppf (loopvar, lower, upper, pp_statement, body)
+  | Profile (name, ls) -> pp_profile ppf (pp_stmt_list, name, ls)
   | Block ls -> pp_block ppf (pp_stmt_list, ls)
   | SList ls -> pp_stmt_list ppf ls
   | Decl {decl_adtype; decl_id; decl_type} ->
