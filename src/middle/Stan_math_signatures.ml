@@ -1801,7 +1801,7 @@ let () =
   add_unqualified ("variance", ReturnType UReal, [UMatrix]) ;
   add_unqualified ("wishart_rng", ReturnType UMatrix, [UReal; UMatrix]) ;
   (* Embedded Laplace approximation *)
-  add_qualified
+  add_qualified  (* function signature with x as an array of vectors *)
     ( "laplace_marginal_bernoulli_logit_lpmf"
     , ReturnType UReal
     , [ (DataOnly, UArray UInt); (DataOnly, UArray UInt)
@@ -1813,7 +1813,7 @@ let () =
       ; (AutoDiffable, UVector); (DataOnly, UArray UVector)
       ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
       ; (AutoDiffable, UVector) ] ) ;
-  add_qualified
+  add_qualified  (* same as above with tuning parameters. *)
     ( "laplace_marginal_bernoulli_logit_lpmf"
     , ReturnType UReal
     , [ (DataOnly, UArray UInt); (DataOnly, UArray UInt)
@@ -1825,7 +1825,7 @@ let () =
       ; (AutoDiffable, UVector); (DataOnly, UArray UVector)
       ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
       ; (AutoDiffable, UVector); (DataOnly, UReal); (DataOnly, UInt) ] ) ;
-  add_qualified
+  add_qualified  (* function signature with x as a matrix. *)
     ( "laplace_marginal_bernoulli_logit_lpmf"
     , ReturnType UReal
     , [ (DataOnly, UArray UInt); (DataOnly, UArray UInt)
@@ -1837,7 +1837,19 @@ let () =
           ; (AutoDiffable, UVector); (DataOnly, UMatrix)
           ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
           ; (AutoDiffable, UVector) ] ) ;
-  add_qualified
+  add_qualified  (* same as above with tuning parameters for Newton solver *)
+    ( "laplace_marginal_bernoulli_logit_lpmf"
+    , ReturnType UReal
+    , [ (DataOnly, UArray UInt); (DataOnly, UArray UInt)
+      ; ( AutoDiffable
+        , UFun
+          ( [ (AutoDiffable, UVector); (DataOnly, UMatrix)
+            ; (DataOnly, UArray UReal); (DataOnly, UArray UInt) ]
+          , ReturnType UMatrix ) )
+          ; (AutoDiffable, UVector); (DataOnly, UMatrix)
+          ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
+          ; (AutoDiffable, UVector); (DataOnly, UReal); (DataOnly, UInt) ] ) ;
+  add_qualified  (* rng function with x as an array of vectors *)
     ( "laplace_bernoulli_logit_rng"
     , ReturnType UVector
     , [ (DataOnly, UArray UInt)
@@ -1850,7 +1862,7 @@ let () =
           ; (AutoDiffable, UVector); (DataOnly, UArray UVector)
           ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
           ; (AutoDiffable, UVector) ] ) ;
-    add_qualified
+    add_qualified  (* rng function with x as a matrix *)
       ( "laplace_bernoulli_logit_rng"
       , ReturnType UVector
       , [ (DataOnly, UArray UInt)
@@ -1863,7 +1875,7 @@ let () =
             ; (AutoDiffable, UVector); (DataOnly, UMatrix)
             ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
             ; (AutoDiffable, UVector) ] ) ;
-  add_qualified
+  add_qualified  (* rng function with x as an array of vectors *)
     ( "laplace_marginal_poisson_log_lpmf"
     , ReturnType UReal
     , [ (DataOnly, UArray UInt); (DataOnly, UArray UInt)
@@ -1875,7 +1887,7 @@ let () =
       ; (AutoDiffable, UVector); (DataOnly, UArray UVector)
       ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
       ; (AutoDiffable, UVector) ] ) ;
-  add_qualified
+  add_qualified  (* function signature with x as a matrix *)
     ( "laplace_marginal_poisson_log_lpmf"
     , ReturnType UReal
     , [ (DataOnly, UArray UInt); (DataOnly, UArray UInt)
@@ -1888,7 +1900,7 @@ let () =
       ; (AutoDiffable, UVector); (DataOnly, UArray UVector)
       ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
       ; (AutoDiffable, UVector) ] ) ;
-  add_qualified
+  add_qualified  (* function signature with x as array of vectors. *)
     ( "laplace_poisson_log_rng"
     , ReturnType UVector
     , [ (DataOnly, UArray UInt)
@@ -1901,7 +1913,7 @@ let () =
       ; (AutoDiffable, UVector); (DataOnly, UArray UVector)
       ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
       ; (AutoDiffable, UVector) ] ) ;
-  add_qualified
+  add_qualified  (* rng function with x as an array of vectors *)
     ( "laplace_poisson_log_rng"
     , ReturnType UVector
     , [ (DataOnly, UArray UInt)
@@ -1915,6 +1927,65 @@ let () =
       ; (AutoDiffable, UVector); (DataOnly, UArray UVector)
       ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
       ; (AutoDiffable, UVector) ] ) ;
+  add_qualified  (* general implementation with tuning parameters *)
+    ("laplace_marginal_lpdf"
+    , ReturnType UReal
+    , [ (DataOnly, UVector)
+      ; (AutoDiffable
+        , UFun
+            ( [ (AutoDiffable, UVector); (AutoDiffable, UVector)
+              ; (DataOnly, UVector); (DataOnly, UArray UInt) ]
+            , ReturnType UReal ) )
+      ; (AutoDiffable, UVector); (DataOnly, UArray UInt)
+      ; (AutoDiffable
+        , UFun
+            ( [ (AutoDiffable, UVector); (DataOnly, UMatrix)
+              ; (DataOnly, UArray UReal); (DataOnly, UArray UInt) ]
+            , ReturnType UMatrix ) )
+      ; (AutoDiffable, UVector); (DataOnly, UMatrix)
+      ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
+      ; (AutoDiffable, UVector); (DataOnly, UReal); (DataOnly, UInt)
+      ; (DataOnly, UInt); (DataOnly, UInt) ] );
+
+  add_qualified (* same as above but lpmf *)
+  ("laplace_marginal_lpmf"
+  , ReturnType UReal
+  , [ (DataOnly, UArray UInt)
+    ; (AutoDiffable
+      , UFun
+          ( [ (AutoDiffable, UVector); (AutoDiffable, UVector)
+            ; (DataOnly, UVector); (DataOnly, UArray UInt) ]
+          , ReturnType UReal ) )
+    ; (AutoDiffable, UVector); (DataOnly, UVector)
+    ; (AutoDiffable
+      , UFun
+          ( [ (AutoDiffable, UVector); (DataOnly, UMatrix)
+            ; (DataOnly, UArray UReal); (DataOnly, UArray UInt) ]
+          , ReturnType UMatrix ) )
+    ; (AutoDiffable, UVector); (DataOnly, UMatrix)
+    ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
+    ; (AutoDiffable, UVector); (DataOnly, UReal); (DataOnly, UInt)
+    ; (DataOnly, UInt); (DataOnly, UInt) ] );
+
+  add_qualified
+  ("laplace_rng"
+  , ReturnType UVector
+  , [ (AutoDiffable
+      , UFun
+      ( [ (AutoDiffable, UVector); (AutoDiffable, UVector)
+        ; (DataOnly, UVector); (DataOnly, UArray UInt) ]
+      , ReturnType UReal ) )
+  ; (AutoDiffable, UVector); (DataOnly, UVector); (DataOnly, UArray UInt)
+  ; (AutoDiffable
+    , UFun
+        ( [ (AutoDiffable, UVector); (DataOnly, UMatrix)
+          ; (DataOnly, UArray UReal); (DataOnly, UArray UInt) ]
+        , ReturnType UMatrix ) )
+  ; (AutoDiffable, UVector); (DataOnly, UMatrix)
+  ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
+  ; (AutoDiffable, UVector); (DataOnly, UReal); (DataOnly, UInt)
+  ; (DataOnly, UInt); (DataOnly, UInt) ] );
+
   add_unqualified ("zeros_int_array", ReturnType (UArray UInt), [UInt]) ;
   add_unqualified ("zeros_array", ReturnType (UArray UReal), [UInt]) ;
   add_unqualified ("zeros_row_vector", ReturnType URowVector, [UInt]) ;
