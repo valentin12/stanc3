@@ -1927,6 +1927,26 @@ let () =
       ; (AutoDiffable, UVector); (DataOnly, UArray UVector)
       ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
       ; (AutoDiffable, UVector) ] ) ;
+
+      add_qualified  (* general implementation without tuning parameters *)
+        ("laplace_marginal_lpdf"
+        , ReturnType UReal
+        , [ (DataOnly, UVector)
+          ; (AutoDiffable
+            , UFun
+                ( [ (AutoDiffable, UVector); (AutoDiffable, UVector)
+                  ; (DataOnly, UVector); (DataOnly, UArray UInt) ]
+                , ReturnType UReal ) )
+          ; (AutoDiffable, UVector); (DataOnly, UArray UInt)
+          ; (AutoDiffable
+            , UFun
+                ( [ (AutoDiffable, UVector); (DataOnly, UMatrix)
+                  ; (DataOnly, UArray UReal); (DataOnly, UArray UInt) ]
+                , ReturnType UMatrix ) )
+          ; (AutoDiffable, UVector); (DataOnly, UMatrix)
+          ; (DataOnly, UArray UReal); (DataOnly, UArray UInt)
+          ; (AutoDiffable, UVector) ] );
+
   add_qualified  (* general implementation with tuning parameters *)
     ("laplace_marginal_lpdf"
     , ReturnType UReal
