@@ -120,7 +120,7 @@ let data_read smeta (decl_id, st) =
       [Assignment ((decl_id, flat_type, []), readfnapp decl_var) |> swrap]
   | UFun _ | UMathLibraryFunction ->
       raise_s [%message "Cannot read a function type."]
-  | UVector | URowVector | UMatrix | UArray _ ->
+  | UVector | URowVector | UMatrix | UVarVector | UVarRowVector | UVarMatrix | UArray _ ->
       let decl, assign, flat_var =
         let decl_id = decl_id ^ "_flat__" in
         ( Stmt.Fixed.Pattern.Decl

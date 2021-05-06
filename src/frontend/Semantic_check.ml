@@ -646,9 +646,9 @@ let inferred_unsizedtype_of_indexed ~loc ut indices =
     | UMatrix, ([`Single] | [`Single; `Multi]) ->
         Validate.ok UnsizedType.URowVector
     | UMatrix, [`Multi; `Single] -> Validate.ok UnsizedType.UVector
-    | UMatrix, _ :: _ :: _ :: _
+    | (UMatrix), _ :: _ :: _ :: _
      |(UVector | URowVector), _ :: _ :: _
-     |(UInt | UReal | UFun _ | UMathLibraryFunction), _ :: _ ->
+     |(UInt | UReal | UFun _ | UMathLibraryFunction | UVarVector | UVarRowVector | UVarMatrix), _ :: _ ->
         Semantic_error.not_indexable loc ut (List.length indices)
         |> Validate.error
   in

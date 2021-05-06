@@ -281,8 +281,8 @@ module Helpers = struct
     in
     match Expr.Typed.type_of iteratee with
     | UInt | UReal -> bodyfn iteratee
-    | UVector | URowVector -> mkfor (len iteratee) bodyfn iteratee smeta
-    | UMatrix ->
+    | UVector | URowVector | UVarVector |UVarRowVector -> mkfor (len iteratee) bodyfn iteratee smeta
+    | UMatrix | UVarMatrix->
         let emeta = iteratee.meta in
         let emeta' = {emeta with Expr.Typed.Meta.type_= UInt} in
         let rows =

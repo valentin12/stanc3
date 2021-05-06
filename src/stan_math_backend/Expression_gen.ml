@@ -101,6 +101,9 @@ let rec pp_unsizedtype_custom_scalar ppf (scalar, ut) =
   | UMatrix -> pf ppf "Eigen::Matrix<%s, -1, -1>" scalar
   | URowVector -> pf ppf "Eigen::Matrix<%s, 1, -1>" scalar
   | UVector -> pf ppf "Eigen::Matrix<%s, -1, 1>" scalar
+  | UVarMatrix -> pf ppf "conditional_var_value_t<local_scalar_t__, Eigen::Matrix<%s, -1, -1>>" scalar
+  | UVarRowVector -> pf ppf "conditional_var_value_t<local_scalar_t__, Eigen::Matrix<%s, 1, -1>>" scalar
+  | UVarVector -> pf ppf "conditional_var_value_t<local_scalar_t__, Eigen::Matrix<%s, -1, 1>>" scalar
   | x -> raise_s [%message (x : UnsizedType.t) "not implemented yet"]
 
 let pp_unsizedtype_custom_scalar_eigen_exprs ppf (scalar, ut) =
@@ -263,8 +266,8 @@ and read_data ut ppf es =
     match ut with
     | UnsizedType.UArray UInt -> "i"
     | UArray UReal -> "r"
-    | UInt | UReal | UVector | URowVector | UMatrix | UArray _ | UFun _
-     |UMathLibraryFunction ->
+    | UInt | UReal | UVector | URowVector | UMatrix | UArray _ | UFun _ | UVarVector | UVarRowVector | UVarMatrix 
+    |UMathLibraryFunction ->
         raise_s [%message "Can't ReadData of " (ut : UnsizedType.t)]
   in
   pf ppf "context__.vals_%s(%a)" i_or_r pp_expr (List.hd_exn es)

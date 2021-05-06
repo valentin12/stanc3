@@ -10,6 +10,9 @@ type t =
   | UArray of t
   | UFun of (autodifftype * t) list * returntype * bool Fun_kind.suffix
   | UMathLibraryFunction
+  | UVarMatrix
+  | UVarVector
+  | UVarRowVector
 
 and autodifftype = DataOnly | AutoDiffable
 
@@ -29,8 +32,8 @@ let unsized_array_depth unsized_ty =
 let count_dims unsized_ty =
   let rec aux dims = function
     | UArray t -> aux (dims + 1) t
-    | UMatrix -> dims + 2
-    | UVector | URowVector -> dims + 1
+    | UMatrix | UVarMatrix -> dims + 2
+    | UVector | URowVector | UVarVector | UVarRowVector -> dims + 1
     | _ -> dims
   in
   aux 0 unsized_ty
@@ -43,8 +46,11 @@ let rec pp ppf = function
   | UInt -> pp_keyword ppf "int"
   | UReal -> pp_keyword ppf "real"
   | UVector -> pp_keyword ppf "vector"
+  | UVarVector -> pp_keyword ppf "vector"
   | URowVector -> pp_keyword ppf "row_vector"
+  | UVarRowVector -> pp_keyword ppf "row_vector"
   | UMatrix -> pp_keyword ppf "matrix"
+  | UVarMatrix -> pp_keyword ppf "matrix"
   | UArray ut ->
       let ut2, d = unwind_array_type ut in
       let array_str = "[" ^ String.make d ',' ^ "]" in
@@ -120,7 +126,7 @@ let rec common_type = function
 
 (* -- Helpers -- *)
 let is_real_type = function
-  | UReal | UVector | URowVector | UMatrix
+  | UReal | UVector | URowVector | UMatrix | UVarVector | UVarRowVector | UVarMatrix
    |UArray UReal
    |UArray UVector
    |UArray URowVector
@@ -129,15 +135,16 @@ let is_real_type = function
   | _ -> false
 
 let rec is_autodiffable = function
-  | UReal | UVector | URowVector | UMatrix -> true
+  | UReal | UVector | URowVector | UMatrix | UVarVector | UVarRowVector | UVarMatrix -> true
   | UArray t -> is_autodiffable t
   | _ -> false
 
 let is_scalar_type = function UReal | UInt -> true | _ -> false
 let is_int_type = function UInt | UArray UInt -> true | _ -> false
 
-let is_eigen_type ut =
-  match ut with UVector | URowVector | UMatrix -> true | _ -> false
+let is_eigen_type = function
+  | UVector | URowVector | UMatrix | UVarVector | UVarRowVector | UVarMatrix -> true
+  | _ -> false
 
 let is_fun_type = function UFun _ -> true | _ -> false
 

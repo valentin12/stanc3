@@ -18,7 +18,7 @@ let pp_profile ppf (pp_body, name, body) =
 let rec contains_eigen (ut : UnsizedType.t) : bool =
   match ut with
   | UnsizedType.UArray t -> contains_eigen t
-  | UMatrix | URowVector | UVector -> true
+  | UMatrix | URowVector | UVector | UVarVector | UVarRowVector | UVarMatrix -> true
   | UInt | UReal | UMathLibraryFunction | UFun _ -> false
 
 (*Fill only needs to happen for containers 

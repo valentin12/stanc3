@@ -35,8 +35,8 @@ let rec unsized_basetype_dims t =
   match t with
   | UnsizedType.UInt -> ("int", 0)
   | UReal -> ("real", 0)
-  | UVector | URowVector -> ("real", 1)
-  | UMatrix -> ("real", 2)
+  | UVector | URowVector | UVarVector | UVarRowVector -> ("real", 1)
+  | UMatrix | UVarMatrix -> ("real", 2)
   | UArray t ->
       let bt, n = unsized_basetype_dims t in
       (bt, n + 1)
