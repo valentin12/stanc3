@@ -274,6 +274,17 @@ let semantic_check_unnormalized cf ~loc id =
 let mk_fun_app ~is_cond_dist (x, y, z) =
   if is_cond_dist then CondDistApp (x, y, z) else FunApp (x, y, z)
 
+let check_substring s1 s2 =
+  try
+    let len = String.length s2 in
+    for i = 0 to String.length s1 - len do
+      if String.sub s1 ~pos:i ~len:len = s2 then raise Exit
+    done;
+    false
+  with Exit -> true
+
+let is_namespaced_fn s = check_substring s "::"
+
 (* Regular function application *)
 let semantic_check_fn_normal ~is_cond_dist ~loc id es =
   Validate.(
@@ -305,8 +316,13 @@ let semantic_check_fn_normal ~is_cond_dist ~loc id es =
         (* Check that Funaps are actually functions *)
         Semantic_error.returning_fn_expected_nonfn_found loc id.name |> error
     | None ->
-        Semantic_error.returning_fn_expected_undeclaredident_found loc id.name
-        |> error)
+       match id.name with
+       | x when is_namespaced_fn x -> mk_typed_expression
+                                        ~expr:(mk_fun_app ~is_cond_dist (StanLib FnPlain, id, es))
+                                        ~ad_level:(expr_ad_lub es) ~type_:UInt ~loc
+                                      |> ok
+       | _ -> Semantic_error.returning_fn_expected_undeclaredident_found loc id.name |> error
+  )
 
 (* Stan-Math function application *)
 let semantic_check_fn_stan_math ~is_cond_dist ~loc id es =

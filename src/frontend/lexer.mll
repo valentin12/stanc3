@@ -32,6 +32,8 @@ let space = ' ' | '\t' | '\012'
 let newline = '\r' | '\n' | '\r'*'\n'
 let non_space_or_newline =  [^ ' ' '\t' '\012' '\r' '\n' ]
 
+let namespaced_identifier =  (identifier "::")+ identifier
+
 rule token = parse
 (* White space, line numers and comments *)
   | newline                   { lexer_logger "newline" ;
@@ -191,6 +193,8 @@ rule token = parse
                                 Parser.STRINGLITERAL (lexeme lexbuf) }
   | identifier as id          { lexer_logger ("identifier " ^ id) ;
                                 Parser.IDENTIFIER (lexeme lexbuf) }
+  | namespaced_identifier as n_id  { lexer_logger ("identifier " ^ n_id) ;
+                                     Parser.NAMED_IDENTIFIER (lexeme lexbuf) }
 (* End of file *)
   | eof                       { lexer_logger "eof" ;
                                 if Stack.length include_stack = 1

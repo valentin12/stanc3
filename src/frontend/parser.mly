@@ -35,6 +35,7 @@ let nest_unsized_array basic_type n =
 %token <string> REALNUMERAL
 %token <string> STRINGLITERAL
 %token <string> IDENTIFIER
+%token <string> NAMED_IDENTIFIER
 %token TARGET
 %token QMARK COLON BANG MINUS PLUS HAT ELTPOW TRANSPOSE TIMES DIVIDE MODULO IDIVIDE
        LDIVIDE ELTTIMES ELTDIVIDE OR AND EQUALS NEQUALS LEQ GEQ TILDE
@@ -131,6 +132,7 @@ generated_quantities_block:
 (* function definitions *)
 identifier:
   | id=IDENTIFIER { build_id id $loc }
+  | id=NAMED_IDENTIFIER { build_id id $loc }
   | TRUNCATE { build_id "T" $loc}
   | OFFSET { build_id "offset" $loc}
   | MULTIPLIER { build_id "multiplier" $loc}
