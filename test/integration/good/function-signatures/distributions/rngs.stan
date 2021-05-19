@@ -310,6 +310,10 @@ generated quantities {
   N = poisson_rng(u);
   n = poisson_rng(3);
   n = poisson_rng(3.5);
+  n = poisson_binomial_rng(n);
+  n = poisson_binomial_rng(z);
+  n = poisson_binomial_rng(3);
+  n = poisson_binomial_rng(3.5);
   N = poisson_log_rng(alpha);
   N = poisson_log_rng(nu);
   N = poisson_log_rng(ns);

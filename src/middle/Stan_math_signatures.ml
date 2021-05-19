@@ -1591,6 +1591,86 @@ let () =
     ( "poisson_log_glm_lpmf"
     , ReturnType UReal
     , [UArray UInt; URowVector; UVector; UVector] ) ;
+  add_unqualified
+    ( "poisson_binomial_lpmf"
+    , ReturnType UReal
+    , [UInt; UInt] ) ;
+  add_unqualified
+    ( "poisson_binomial_lpmf"
+    , ReturnType UReal
+    , [UInt; UReal] ) ;
+  add_unqualified
+    ( "poisson_binomial_lpmf"
+    , ReturnType UReal
+    , [UInt; UVector] ) ;
+  add_unqualified
+    ( "poisson_binomial_lpmf"
+    , ReturnType UReal
+    , [UInt; URowVector] ) ;
+  add_unqualified
+    ( "poisson_binomial_lpmf"
+    , ReturnType UReal
+    , [UArray UInt; UVector] ) ;
+  add_unqualified
+    ( "poisson_binomial_lpmf"
+    , ReturnType UReal
+    , [UArray UInt; URowVector] ) ;
+  add_unqualified
+    ( "poisson_binomial_cdf"
+    , ReturnType UReal
+    , [UInt; UVector] ) ;
+  add_unqualified
+    ( "poisson_binomial_cdf"
+    , ReturnType UReal
+    , [UInt; URowVector] ) ;
+  add_unqualified
+    ( "poisson_binomial_cdf"
+    , ReturnType UReal
+    , [UArray UInt; UVector] ) ;
+  add_unqualified
+    ( "poisson_binomial_cdf"
+    , ReturnType UReal
+    , [UArray UInt; URowVector] ) ;
+  add_unqualified
+    ( "poisson_binomial_lcdf"
+    , ReturnType UReal
+    , [UInt; UVector] ) ;
+  add_unqualified
+    ( "poisson_binomial_lcdf"
+    , ReturnType UReal
+    , [UInt; URowVector] ) ;
+  add_unqualified
+    ( "poisson_binomial_lcdf"
+    , ReturnType UReal
+    , [UArray UInt; UVector] ) ;
+  add_unqualified
+    ( "poisson_binomial_lcdf"
+    , ReturnType UReal
+    , [UArray UInt; URowVector] ) ;
+  add_unqualified
+    ( "poisson_binomial_lccdf"
+    , ReturnType UReal
+    , [UInt; UVector] ) ;
+  add_unqualified
+    ( "poisson_binomial_lccdf"
+    , ReturnType UReal
+    , [UInt; URowVector] ) ;
+  add_unqualified
+    ( "poisson_binomial_lccdf"
+    , ReturnType UReal
+    , [UArray UInt; UVector] ) ;
+  add_unqualified
+    ( "poisson_binomial_lccdf"
+    , ReturnType UReal
+    , [UArray UInt; URowVector] ) ;
+  add_unqualified
+    ( "poisson_binomial_rng"
+    , ReturnType UInt
+    , [UInt] ) ;
+  add_unqualified
+    ( "poisson_binomial_rng"
+    , ReturnType UInt
+    , [UReal] ) ;
   add_nullary "positive_infinity" ;
   add_binary_vec "pow" ;
   add_unqualified ("prod", ReturnType UInt, [UArray UInt]) ;
