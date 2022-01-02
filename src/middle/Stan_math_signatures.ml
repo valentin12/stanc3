@@ -46,7 +46,7 @@ let rec expand_arg = function
       let all_base = [UnsizedType.UInt; UReal; URowVector; UVector; UMatrix] in
       List.(
         concat_map all_base ~f:(fun a ->
-            map (range 0 8) ~f:(fun i -> bare_array_type (a, i)) ))
+            map (range 0 1) ~f:(fun i -> bare_array_type (a, i)) ))
 
 type fkind = Lpmf | Lpdf | Rng | Cdf | Ccdf | UnaryVectorized
 type fun_arg = UnsizedType.autodifftype * UnsizedType.t
@@ -204,8 +204,8 @@ let is_variadic_ode_nonadjoint_tol_fn f =
   is_variadic_ode_nonadjoint_fn f
   && String.is_suffix f ~suffix:ode_tolerances_suffix
 
-let distributions =
-  [ ( full_lpmf
+let distributions = [
+  (* [ ( full_lpmf
     , "beta_binomial"
     , [DVInt; DVInt; DVReal; DVReal]
     , Common.Helpers.AoS ); (full_lpdf, "beta", [DVReal; DVReal; DVReal], AoS)
@@ -213,9 +213,9 @@ let distributions =
   ; (full_lpmf, "bernoulli", [DVInt; DVReal], AoS)
   ; ([Lpmf; Rng], "bernoulli_logit", [DVInt; DVReal], AoS)
   ; ([Lpmf], "bernoulli_logit_glm", [DVInt; DMatrix; DReal; DVector], AoS)
-  ; (full_lpmf, "binomial", [DVInt; DVInt; DVReal], AoS)
-  ; ([Lpmf], "binomial_logit", [DVInt; DVInt; DVReal], AoS)
-  ; ([Lpmf], "categorical", [DVInt; DVector], AoS)
+  ; (full_lpmf, "binomial", [DVInt; DVInt; DVReal], AoS) *)
+  ([Lpmf], "binomial_logit", [DVInt; DVInt; DVReal], Common.Helpers.AoS)]
+  (*; ([Lpmf], "categorical", [DVInt; DVector], AoS)
   ; ([Lpmf], "categorical_logit", [DVInt; DVector], AoS)
   ; ([Lpmf], "categorical_logit_glm", [DVInt; DMatrix; DVector; DMatrix], AoS)
   ; (full_lpdf, "cauchy", [DVReal; DVReal; DVReal], AoS)
@@ -274,7 +274,7 @@ let distributions =
   ; ([Lpdf; Rng], "von_mises", [DVReal; DVReal; DVReal], AoS)
   ; (full_lpdf, "weibull", [DVReal; DVReal; DVReal], AoS)
   ; ([Lpdf], "wiener", [DVReal; DVReal; DVReal; DVReal; DVReal], AoS)
-  ; ([Lpdf], "wishart", [DMatrix; DReal; DMatrix], AoS) ]
+  ; ([Lpdf], "wishart", [DMatrix; DReal; DMatrix], AoS) ] *)
 
 let math_sigs =
   [ ([UnaryVectorized], "acos", [DDeepVectorized], Common.Helpers.AoS)
