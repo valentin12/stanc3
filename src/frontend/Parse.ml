@@ -9,6 +9,7 @@ let parse parse_fun lexbuf =
   (* see the Menhir manual for the description of
      error messages support *)
   let module Interp = Parser.MenhirInterpreter in
+  Stack.clear Preprocessor.include_stack ;
   Stack.push Preprocessor.include_stack lexbuf ;
   let input () =
     (Interp.lexer_lexbuf_to_supplier Lexer.token
