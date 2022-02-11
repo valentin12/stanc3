@@ -23,40 +23,52 @@ let rec replace_deprecated_expr
   let expr =
     match expr with
     | GetLP -> GetTarget
-    | FunApp (StanLib, {name= "abs"; id_loc}, [e])
+    | FunApp (StanLib FnPlain, {name= "abs"; id_loc}, [e])
       when Middle.UnsizedType.is_real_type e.emeta.type_ ->
         FunApp
-          ( StanLib
+          ( StanLib FnPlain
           , {name= "fabs"; id_loc}
           , [replace_deprecated_expr deprecated_userdefined e] )
-    | FunApp (StanLib, {name= "if_else"; _}, [c; t; e]) ->
+    | FunApp (StanLib FnPlain, {name= "if_else"; _}, [c; t; e]) ->
         Paren
           (replace_deprecated_expr deprecated_userdefined
              {expr= TernaryIf ({expr= Paren c; emeta= c.emeta}, t, e); emeta})
-    | FunApp (StanLib, {name; id_loc}, e) ->
+    | FunApp (StanLib suffix, {name; id_loc}, e) ->
         if is_deprecated_distribution name then
           CondDistApp
-            ( StanLib
+            ( StanLib suffix
             , {name= rename_deprecated deprecated_distributions name; id_loc}
+            , List.map ~f:(replace_deprecated_expr deprecated_userdefined) e )
+        else if String.is_suffix name ~suffix:"_cdf" then
+          CondDistApp
+            ( StanLib suffix
+            , {name; id_loc}
             , List.map ~f:(replace_deprecated_expr deprecated_userdefined) e )
         else
           FunApp
-            ( StanLib
+            ( StanLib suffix
             , {name= rename_deprecated deprecated_functions name; id_loc}
             , List.map ~f:(replace_deprecated_expr deprecated_userdefined) e )
-    | FunApp (UserDefined, {name; id_loc}, e) -> (
+    | FunApp (UserDefined suffix, {name; id_loc}, e) -> (
       match String.Map.find deprecated_userdefined name with
       | Some type_ ->
           CondDistApp
-            ( UserDefined
+            ( UserDefined suffix
             , {name= update_suffix name type_; id_loc}
             , List.map ~f:(replace_deprecated_expr deprecated_userdefined) e )
       | None ->
-          FunApp
-            ( UserDefined
-            , {name; id_loc}
-            , List.map ~f:(replace_deprecated_expr deprecated_userdefined) e )
-      )
+          if String.is_suffix name ~suffix:"_cdf" then
+            CondDistApp
+              ( UserDefined suffix
+              , {name; id_loc}
+              , List.map ~f:(replace_deprecated_expr deprecated_userdefined) e
+              )
+          else
+            FunApp
+              ( UserDefined suffix
+              , {name; id_loc}
+              , List.map ~f:(replace_deprecated_expr deprecated_userdefined) e
+              ) )
     | _ ->
         map_expression
           (replace_deprecated_expr deprecated_userdefined)
@@ -102,7 +114,8 @@ let rec replace_deprecated_stmt
 let rec no_parens {expr; emeta} =
   match expr with
   | Paren e -> no_parens e
-  | Variable _ | IntNumeral _ | RealNumeral _ | GetLP | GetTarget ->
+  | Variable _ | IntNumeral _ | RealNumeral _ | ImagNumeral _ | GetLP
+   |GetTarget ->
       {expr; emeta}
   | TernaryIf _ | BinOp _ | PrefixOp _ | PostfixOp _ ->
       {expr= map_expression keep_parens ident expr; emeta}
@@ -131,7 +144,16 @@ and keep_parens {expr; emeta} =
 
 let parens_lval = map_lval_with no_parens ident
 
-let rec parens_stmt {stmt; smeta} =
+let stmt_to_block ({stmt; smeta} : typed_statement) : typed_statement =
+  match stmt with
+  | Block _ -> {stmt; smeta}
+  | _ ->
+      mk_typed_statement
+        ~stmt:(Block [{stmt; smeta}])
+        ~return_type:smeta.return_type ~loc:smeta.loc
+
+let rec parens_stmt ({stmt; smeta} : typed_statement) : typed_statement =
+  let parens_block s = parens_stmt (stmt_to_block s) in
   let stmt =
     match stmt with
     | VarDecl
@@ -142,16 +164,19 @@ let rec parens_stmt {stmt; smeta} =
         ; is_global } ->
         VarDecl
           { decl_type= Middle.Type.map no_parens d
-          ; transformation= Middle.Program.map_transformation keep_parens t
+          ; transformation= Middle.Transformation.map keep_parens t
           ; identifier
           ; initial_value= Option.map ~f:no_parens init
           ; is_global }
+    | While (e, s) -> While (no_parens e, parens_block s)
+    | IfThenElse (e, s1, s2) ->
+        IfThenElse (no_parens e, parens_block s1, Option.map ~f:parens_block s2)
     | For {loop_variable; lower_bound; upper_bound; loop_body} ->
         For
           { loop_variable
           ; lower_bound= keep_parens lower_bound
           ; upper_bound= keep_parens upper_bound
-          ; loop_body= parens_stmt loop_body }
+          ; loop_body= parens_block loop_body }
     | _ -> map_statement no_parens parens_stmt parens_lval ident stmt
   in
   {stmt; smeta}

@@ -118,6 +118,7 @@ transformed parameters {
   z = ode_adams(f_2_arg, vd, rd, rad, id, rd);
   z = ode_adams(f_1_arg, vd, rd, rad, rd);
   z = ode_adams(f_0_arg, vd, rd, rad);
+  
   z = ode_adams(f_12_arg, v, r, ra, ma, rva, va, iaad, raa, m, rv, v, iad,
                 ra, id, r);
   z = ode_adams(f_11_arg, v, r, ra, rva, va, iaad, raa, m, rv, v, iad, ra,
@@ -153,6 +154,7 @@ model {
   zm = ode_adams(f_2_arg, vd, rd, rad, id, rd);
   zm = ode_adams(f_1_arg, vd, rd, rad, rd);
   zm = ode_adams(f_0_arg, vd, rd, rad);
+  
   zm = ode_adams(f_12_arg, v, r, ra, ma, rva, va, iaad, raa, m, rv, v, iad,
                  ra, id, r);
   zm = ode_adams(f_11_arg, v, r, ra, rva, va, iaad, raa, m, rv, v, iad, ra,
@@ -168,6 +170,7 @@ model {
   zm = ode_adams(f_2_arg, v, r, ra, id, r);
   zm = ode_adams(f_1_arg, v, r, ra, r);
   zm = ode_adams(f_0_arg, v, r, ra);
+  
   r ~ normal(0, 1);
 }
 generated quantities {
@@ -189,6 +192,7 @@ generated quantities {
   zg = ode_adams(f_2_arg, vd, rd, rad, id, rd);
   zg = ode_adams(f_1_arg, vd, rd, rad, rd);
   zg = ode_adams(f_0_arg, vd, rd, rad);
+  
   zg = ode_adams(f_12_arg, v, r, ra, ma, rva, va, iaad, raa, m, rv, v, iad,
                  ra, id, r);
   zg = ode_adams(f_11_arg, v, r, ra, rva, va, iaad, raa, m, rv, v, iad, ra,
@@ -335,6 +339,7 @@ transformed parameters {
   z = ode_adams_tol(f_2_arg, vd, rd, rad, 1e-6, 1e-6, 100, id, rd);
   z = ode_adams_tol(f_1_arg, vd, rd, rad, 1e-6, 1e-6, 100, rd);
   z = ode_adams_tol(f_0_arg, vd, rd, rad, 1e-6, 1e-6, 100);
+  
   z = ode_adams_tol(f_12_arg, v, r, ra, 1e-6, 1e-6, 100, ma, rva, va, iaad,
                     raa, m, rv, v, iad, ra, id, r);
   z = ode_adams_tol(f_11_arg, v, r, ra, 1e-6, 1e-6, 100, rva, va, iaad, raa,
@@ -379,6 +384,7 @@ model {
   zm = ode_adams_tol(f_2_arg, vd, rd, rad, 1e-6, 1e-6, 100, id, rd);
   zm = ode_adams_tol(f_1_arg, vd, rd, rad, 1e-6, 1e-6, 100, rd);
   zm = ode_adams_tol(f_0_arg, vd, rd, rad, 1e-6, 1e-6, 100);
+  
   zm = ode_adams_tol(f_12_arg, v, r, ra, 1e-6, 1e-6, 100, ma, rva, va, iaad,
                      raa, m, rv, v, iad, ra, id, r);
   zm = ode_adams_tol(f_11_arg, v, r, ra, 1e-6, 1e-6, 100, rva, va, iaad, raa,
@@ -399,6 +405,7 @@ model {
   zm = ode_adams_tol(f_2_arg, v, r, ra, 1e-6, 1e-6, 100, id, r);
   zm = ode_adams_tol(f_1_arg, v, r, ra, 1e-6, 1e-6, 100, r);
   zm = ode_adams_tol(f_0_arg, v, r, ra, 1e-6, 1e-6, 100);
+  
   r ~ normal(0, 1);
 }
 generated quantities {
@@ -424,6 +431,7 @@ generated quantities {
   zg = ode_adams_tol(f_2_arg, vd, rd, rad, 1e-6, 1e-6, 100, id, rd);
   zg = ode_adams_tol(f_1_arg, vd, rd, rad, 1e-6, 1e-6, 100, rd);
   zg = ode_adams_tol(f_0_arg, vd, rd, rad, 1e-6, 1e-6, 100);
+  
   zg = ode_adams_tol(f_12_arg, v, r, ra, 1e-6, 1e-6, 100, ma, rva, va, iaad,
                      raa, m, rv, v, iad, ra, id, r);
   zg = ode_adams_tol(f_11_arg, v, r, ra, 1e-6, 1e-6, 100, rva, va, iaad, raa,
@@ -444,6 +452,65 @@ generated quantities {
   zg = ode_adams_tol(f_2_arg, v, r, ra, 1e-6, 1e-6, 100, id, r);
   zg = ode_adams_tol(f_1_arg, v, r, ra, 1e-6, 1e-6, 100, r);
   zg = ode_adams_tol(f_0_arg, v, r, ra, 1e-6, 1e-6, 100);
+}
+
+  $ ../../../../../install/default/bin/stanc --auto-format ode_adjoint_test_model.stan
+functions {
+  vector f_0_arg(real t, vector z) {
+    return z;
+  }
+  vector f_1_arg(real t, vector z, real a) {
+    return z;
+  }
+  vector f_2_arg(real t, vector z, int b, real a) {
+    return z;
+  }
+}
+data {
+  int N;
+  int M;
+  int i;
+}
+transformed data {
+  real rel_tol_f;
+  vector[N] abs_tol_f;
+  real rel_tol_b;
+  vector[N] abs_tol_b;
+  real rel_tol_q;
+  real abs_tol_q;
+  int max_num_steps;
+  int num_checkpoints;
+  int interpolation_polynomial;
+  int solver_f;
+  int solver_b;
+}
+parameters {
+  real y;
+  
+  vector[N] y0;
+  real t0;
+  array[N] real times;
+}
+transformed parameters {
+  array[M] vector[N] z;
+  
+  z = ode_adjoint_tol_ctl(f_0_arg, y0, t0, times, rel_tol_f, abs_tol_f,
+                          rel_tol_b, abs_tol_b, rel_tol_q, abs_tol_q,
+                          max_num_steps, num_checkpoints,
+                          interpolation_polynomial, solver_f, solver_b);
+  
+  z = ode_adjoint_tol_ctl(f_1_arg, y0, t0, times, rel_tol_f, abs_tol_f,
+                          rel_tol_b, abs_tol_b, rel_tol_q, abs_tol_q,
+                          max_num_steps, num_checkpoints,
+                          interpolation_polynomial, solver_f, solver_b, y);
+  
+  z = ode_adjoint_tol_ctl(f_2_arg, y0, t0, times, rel_tol_f, abs_tol_f,
+                          rel_tol_b, abs_tol_b, rel_tol_q, abs_tol_q,
+                          max_num_steps, num_checkpoints,
+                          interpolation_polynomial, solver_f, solver_b, i, y);
+}
+model {
+  y ~ normal(0, 1);
 }
 
   $ ../../../../../install/default/bin/stanc --auto-format ode_bdf_test_model.stan
@@ -565,6 +632,7 @@ transformed parameters {
   z = ode_bdf(f_2_arg, vd, rd, rad, id, rd);
   z = ode_bdf(f_1_arg, vd, rd, rad, rd);
   z = ode_bdf(f_0_arg, vd, rd, rad);
+  
   z = ode_bdf(f_12_arg, v, r, ra, ma, rva, va, iaad, raa, m, rv, v, iad, ra,
               id, r);
   z = ode_bdf(f_11_arg, v, r, ra, rva, va, iaad, raa, m, rv, v, iad, ra, id,
@@ -599,6 +667,7 @@ model {
   zm = ode_bdf(f_2_arg, vd, rd, rad, id, rd);
   zm = ode_bdf(f_1_arg, vd, rd, rad, rd);
   zm = ode_bdf(f_0_arg, vd, rd, rad);
+  
   zm = ode_bdf(f_12_arg, v, r, ra, ma, rva, va, iaad, raa, m, rv, v, iad, ra,
                id, r);
   zm = ode_bdf(f_11_arg, v, r, ra, rva, va, iaad, raa, m, rv, v, iad, ra, id,
@@ -614,6 +683,7 @@ model {
   zm = ode_bdf(f_2_arg, v, r, ra, id, r);
   zm = ode_bdf(f_1_arg, v, r, ra, r);
   zm = ode_bdf(f_0_arg, v, r, ra);
+  
   r ~ normal(0, 1);
 }
 generated quantities {
@@ -634,6 +704,7 @@ generated quantities {
   zg = ode_bdf(f_2_arg, vd, rd, rad, id, rd);
   zg = ode_bdf(f_1_arg, vd, rd, rad, rd);
   zg = ode_bdf(f_0_arg, vd, rd, rad);
+  
   zg = ode_bdf(f_12_arg, v, r, ra, ma, rva, va, iaad, raa, m, rv, v, iad, ra,
                id, r);
   zg = ode_bdf(f_11_arg, v, r, ra, rva, va, iaad, raa, m, rv, v, iad, ra, id,
@@ -780,6 +851,7 @@ transformed parameters {
   z = ode_bdf_tol(f_2_arg, vd, rd, rad, 1e-6, 1e-6, 100, id, rd);
   z = ode_bdf_tol(f_1_arg, vd, rd, rad, 1e-6, 1e-6, 100, rd);
   z = ode_bdf_tol(f_0_arg, vd, rd, rad, 1e-6, 1e-6, 100);
+  
   z = ode_bdf_tol(f_12_arg, v, r, ra, 1e-6, 1e-6, 100, ma, rva, va, iaad,
                   raa, m, rv, v, iad, ra, id, r);
   z = ode_bdf_tol(f_11_arg, v, r, ra, 1e-6, 1e-6, 100, rva, va, iaad, raa, m,
@@ -823,6 +895,7 @@ model {
   zm = ode_bdf_tol(f_2_arg, vd, rd, rad, 1e-6, 1e-6, 100, id, rd);
   zm = ode_bdf_tol(f_1_arg, vd, rd, rad, 1e-6, 1e-6, 100, rd);
   zm = ode_bdf_tol(f_0_arg, vd, rd, rad, 1e-6, 1e-6, 100);
+  
   zm = ode_bdf_tol(f_12_arg, v, r, ra, 1e-6, 1e-6, 100, ma, rva, va, iaad,
                    raa, m, rv, v, iad, ra, id, r);
   zm = ode_bdf_tol(f_11_arg, v, r, ra, 1e-6, 1e-6, 100, rva, va, iaad, raa,
@@ -842,6 +915,7 @@ model {
   zm = ode_bdf_tol(f_2_arg, v, r, ra, 1e-6, 1e-6, 100, id, r);
   zm = ode_bdf_tol(f_1_arg, v, r, ra, 1e-6, 1e-6, 100, r);
   zm = ode_bdf_tol(f_0_arg, v, r, ra, 1e-6, 1e-6, 100);
+  
   r ~ normal(0, 1);
 }
 generated quantities {
@@ -867,6 +941,7 @@ generated quantities {
   zg = ode_bdf_tol(f_2_arg, vd, rd, rad, 1e-6, 1e-6, 100, id, rd);
   zg = ode_bdf_tol(f_1_arg, vd, rd, rad, 1e-6, 1e-6, 100, rd);
   zg = ode_bdf_tol(f_0_arg, vd, rd, rad, 1e-6, 1e-6, 100);
+  
   zg = ode_bdf_tol(f_12_arg, v, r, ra, 1e-6, 1e-6, 100, ma, rva, va, iaad,
                    raa, m, rv, v, iad, ra, id, r);
   zg = ode_bdf_tol(f_11_arg, v, r, ra, 1e-6, 1e-6, 100, rva, va, iaad, raa,
@@ -1007,6 +1082,7 @@ transformed parameters {
   z = ode_ckrk(f_2_arg, vd, rd, rad, id, rd);
   z = ode_ckrk(f_1_arg, vd, rd, rad, rd);
   z = ode_ckrk(f_0_arg, vd, rd, rad);
+  
   z = ode_ckrk(f_12_arg, v, r, ra, ma, rva, va, iaad, raa, m, rv, v, iad, ra,
                id, r);
   z = ode_ckrk(f_11_arg, v, r, ra, rva, va, iaad, raa, m, rv, v, iad, ra, id,
@@ -1041,6 +1117,7 @@ model {
   zm = ode_ckrk(f_2_arg, vd, rd, rad, id, rd);
   zm = ode_ckrk(f_1_arg, vd, rd, rad, rd);
   zm = ode_ckrk(f_0_arg, vd, rd, rad);
+  
   zm = ode_ckrk(f_12_arg, v, r, ra, ma, rva, va, iaad, raa, m, rv, v, iad,
                 ra, id, r);
   zm = ode_ckrk(f_11_arg, v, r, ra, rva, va, iaad, raa, m, rv, v, iad, ra,
@@ -1056,6 +1133,7 @@ model {
   zm = ode_ckrk(f_2_arg, v, r, ra, id, r);
   zm = ode_ckrk(f_1_arg, v, r, ra, r);
   zm = ode_ckrk(f_0_arg, v, r, ra);
+  
   r ~ normal(0, 1);
 }
 generated quantities {
@@ -1076,6 +1154,7 @@ generated quantities {
   zg = ode_ckrk(f_2_arg, vd, rd, rad, id, rd);
   zg = ode_ckrk(f_1_arg, vd, rd, rad, rd);
   zg = ode_ckrk(f_0_arg, vd, rd, rad);
+  
   zg = ode_ckrk(f_12_arg, v, r, ra, ma, rva, va, iaad, raa, m, rv, v, iad,
                 ra, id, r);
   zg = ode_ckrk(f_11_arg, v, r, ra, rva, va, iaad, raa, m, rv, v, iad, ra,
@@ -1222,6 +1301,7 @@ transformed parameters {
   z = ode_ckrk_tol(f_2_arg, vd, rd, rad, 1e-6, 1e-6, 100, id, rd);
   z = ode_ckrk_tol(f_1_arg, vd, rd, rad, 1e-6, 1e-6, 100, rd);
   z = ode_ckrk_tol(f_0_arg, vd, rd, rad, 1e-6, 1e-6, 100);
+  
   z = ode_ckrk_tol(f_12_arg, v, r, ra, 1e-6, 1e-6, 100, ma, rva, va, iaad,
                    raa, m, rv, v, iad, ra, id, r);
   z = ode_ckrk_tol(f_11_arg, v, r, ra, 1e-6, 1e-6, 100, rva, va, iaad, raa,
@@ -1265,6 +1345,7 @@ model {
   zm = ode_ckrk_tol(f_2_arg, vd, rd, rad, 1e-6, 1e-6, 100, id, rd);
   zm = ode_ckrk_tol(f_1_arg, vd, rd, rad, 1e-6, 1e-6, 100, rd);
   zm = ode_ckrk_tol(f_0_arg, vd, rd, rad, 1e-6, 1e-6, 100);
+  
   zm = ode_ckrk_tol(f_12_arg, v, r, ra, 1e-6, 1e-6, 100, ma, rva, va, iaad,
                     raa, m, rv, v, iad, ra, id, r);
   zm = ode_ckrk_tol(f_11_arg, v, r, ra, 1e-6, 1e-6, 100, rva, va, iaad, raa,
@@ -1451,6 +1532,7 @@ transformed parameters {
   z = ode_rk45(f_2_arg, vd, rd, rad, id, rd);
   z = ode_rk45(f_1_arg, vd, rd, rad, rd);
   z = ode_rk45(f_0_arg, vd, rd, rad);
+  
   z = ode_rk45(f_12_arg, v, r, ra, ma, rva, va, iaad, raa, m, rv, v, iad, ra,
                id, r);
   z = ode_rk45(f_11_arg, v, r, ra, rva, va, iaad, raa, m, rv, v, iad, ra, id,
@@ -1485,6 +1567,7 @@ model {
   zm = ode_rk45(f_2_arg, vd, rd, rad, id, rd);
   zm = ode_rk45(f_1_arg, vd, rd, rad, rd);
   zm = ode_rk45(f_0_arg, vd, rd, rad);
+  
   zm = ode_rk45(f_12_arg, v, r, ra, ma, rva, va, iaad, raa, m, rv, v, iad,
                 ra, id, r);
   zm = ode_rk45(f_11_arg, v, r, ra, rva, va, iaad, raa, m, rv, v, iad, ra,
@@ -1500,6 +1583,7 @@ model {
   zm = ode_rk45(f_2_arg, v, r, ra, id, r);
   zm = ode_rk45(f_1_arg, v, r, ra, r);
   zm = ode_rk45(f_0_arg, v, r, ra);
+  
   r ~ normal(0, 1);
 }
 generated quantities {
@@ -1520,6 +1604,7 @@ generated quantities {
   zg = ode_rk45(f_2_arg, vd, rd, rad, id, rd);
   zg = ode_rk45(f_1_arg, vd, rd, rad, rd);
   zg = ode_rk45(f_0_arg, vd, rd, rad);
+  
   zg = ode_rk45(f_12_arg, v, r, ra, ma, rva, va, iaad, raa, m, rv, v, iad,
                 ra, id, r);
   zg = ode_rk45(f_11_arg, v, r, ra, rva, va, iaad, raa, m, rv, v, iad, ra,
@@ -1666,6 +1751,7 @@ transformed parameters {
   z = ode_rk45_tol(f_2_arg, vd, rd, rad, 1e-6, 1e-6, 100, id, rd);
   z = ode_rk45_tol(f_1_arg, vd, rd, rad, 1e-6, 1e-6, 100, rd);
   z = ode_rk45_tol(f_0_arg, vd, rd, rad, 1e-6, 1e-6, 100);
+  
   z = ode_rk45_tol(f_12_arg, v, r, ra, 1e-6, 1e-6, 100, ma, rva, va, iaad,
                    raa, m, rv, v, iad, ra, id, r);
   z = ode_rk45_tol(f_11_arg, v, r, ra, 1e-6, 1e-6, 100, rva, va, iaad, raa,
@@ -1709,6 +1795,7 @@ model {
   zm = ode_rk45_tol(f_2_arg, vd, rd, rad, 1e-6, 1e-6, 100, id, rd);
   zm = ode_rk45_tol(f_1_arg, vd, rd, rad, 1e-6, 1e-6, 100, rd);
   zm = ode_rk45_tol(f_0_arg, vd, rd, rad, 1e-6, 1e-6, 100);
+  
   zm = ode_rk45_tol(f_12_arg, v, r, ra, 1e-6, 1e-6, 100, ma, rva, va, iaad,
                     raa, m, rv, v, iad, ra, id, r);
   zm = ode_rk45_tol(f_11_arg, v, r, ra, 1e-6, 1e-6, 100, rva, va, iaad, raa,

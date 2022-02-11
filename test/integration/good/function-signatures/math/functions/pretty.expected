@@ -6,6 +6,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = abs(d_int);
   transformed_data_real = abs(d_real);
 }
@@ -15,6 +16,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = abs(d_int);
   transformed_param_real = abs(d_real);
   transformed_param_real = abs(p_real);
@@ -34,6 +36,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = acos(d_int);
   transformed_data_real = acos(d_real);
 }
@@ -43,6 +46,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = acos(d_int);
   transformed_param_real = acos(d_real);
   transformed_param_real = acos(p_real);
@@ -59,6 +63,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = acosh(d_int);
   transformed_data_real = acosh(d_real);
 }
@@ -68,6 +73,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = acosh(d_int);
   transformed_param_real = acosh(d_real);
   transformed_param_real = acosh(p_real);
@@ -84,6 +90,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = asin(d_int);
   transformed_data_real = asin(d_real);
 }
@@ -93,6 +100,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = asin(d_int);
   transformed_param_real = asin(d_real);
   transformed_param_real = asin(p_real);
@@ -109,6 +117,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = asinh(d_int);
   transformed_data_real = asinh(d_real);
 }
@@ -118,6 +127,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = asinh(d_int);
   transformed_param_real = asinh(d_real);
   transformed_param_real = asinh(p_real);
@@ -134,6 +144,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = atan(d_int);
   transformed_data_real = atan(d_real);
 }
@@ -143,6 +154,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = atan(d_int);
   transformed_param_real = atan(d_real);
   transformed_param_real = atan(p_real);
@@ -161,6 +173,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = atan2(d_real, r_real);
   transformed_data_real = atan2(d_int, r_real);
   transformed_data_real = atan2(d_real, d_int);
@@ -172,10 +185,12 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = atan2(d_real, r_real);
   transformed_param_real = atan2(d_int, r_real);
   transformed_param_real = atan2(d_real, d_int);
   transformed_param_real = atan2(r_int, d_int);
+  
   transformed_param_real = atan2(r_int, p_real);
   transformed_param_real = atan2(r_real, p_real);
   transformed_param_real = atan2(p_real, p_real);
@@ -194,6 +209,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = atanh(d_int);
   transformed_data_real = atanh(d_real);
 }
@@ -203,6 +219,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = atanh(d_int);
   transformed_param_real = atanh(d_real);
   transformed_param_real = atanh(p_real);
@@ -220,6 +237,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = bessel_first_kind(d_int, r_int);
   transformed_data_real = bessel_first_kind(d_int, d_real);
 }
@@ -229,6 +247,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = bessel_first_kind(d_int, r_int);
   transformed_param_real = bessel_first_kind(d_int, d_real);
   transformed_param_real = bessel_first_kind(d_int, p_real);
@@ -246,6 +265,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = bessel_second_kind(d_int, r_int);
   transformed_data_real = bessel_second_kind(d_int, d_real);
 }
@@ -255,6 +275,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = bessel_second_kind(d_int, r_int);
   transformed_param_real = bessel_second_kind(d_int, d_real);
   transformed_param_real = bessel_second_kind(d_int, p_real);
@@ -272,6 +293,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = binary_log_loss(d_int, r_int);
   transformed_data_real = binary_log_loss(d_int, d_real);
 }
@@ -281,6 +303,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = binary_log_loss(d_int, r_int);
   transformed_param_real = binary_log_loss(d_int, d_real);
   transformed_param_real = binary_log_loss(d_int, p_real);
@@ -299,6 +322,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = binomial_coefficient_log(d_real, r_real);
   transformed_data_real = binomial_coefficient_log(d_int, r_real);
   transformed_data_real = binomial_coefficient_log(d_real, d_int);
@@ -310,10 +334,12 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = binomial_coefficient_log(d_real, r_real);
   transformed_param_real = binomial_coefficient_log(d_int, r_real);
   transformed_param_real = binomial_coefficient_log(d_real, d_int);
   transformed_param_real = binomial_coefficient_log(r_int, d_int);
+  
   transformed_param_real = binomial_coefficient_log(r_int, p_real);
   transformed_param_real = binomial_coefficient_log(r_real, p_real);
   transformed_param_real = binomial_coefficient_log(p_real, p_real);
@@ -345,6 +371,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = cbrt(d_int);
   transformed_data_real = cbrt(d_real);
 }
@@ -354,6 +381,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = cbrt(d_int);
   transformed_param_real = cbrt(d_real);
   transformed_param_real = cbrt(p_real);
@@ -370,6 +398,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = ceil(d_int);
   transformed_data_real = ceil(d_real);
 }
@@ -379,6 +408,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = ceil(d_int);
   transformed_param_real = ceil(d_real);
   transformed_param_real = ceil(p_real);
@@ -394,6 +424,7 @@ data {
 }
 transformed data {
   int transformed_data_int;
+  
   transformed_data_int = choose(r_int, d_int);
 }
 parameters {
@@ -410,6 +441,7 @@ data {
 }
 transformed data {
   real transformed_data_real;
+  
   transformed_data_real = pi();
   transformed_data_real = e();
   transformed_data_real = sqrt2();
@@ -422,6 +454,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = pi();
   transformed_param_real = e();
   transformed_param_real = sqrt2();
@@ -440,6 +473,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = cos(d_int);
   transformed_data_real = cos(d_real);
 }
@@ -449,6 +483,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = cos(d_int);
   transformed_param_real = cos(d_real);
   transformed_param_real = cos(p_real);
@@ -465,6 +500,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = cosh(d_int);
   transformed_data_real = cosh(d_real);
 }
@@ -474,6 +510,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = cosh(d_int);
   transformed_param_real = cosh(d_real);
   transformed_param_real = cosh(p_real);
@@ -490,6 +527,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = digamma(d_int);
   transformed_data_real = digamma(d_real);
 }
@@ -499,6 +537,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = digamma(d_int);
   transformed_param_real = digamma(d_real);
   transformed_param_real = digamma(p_real);
@@ -515,6 +554,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = erf(d_int);
   transformed_data_real = erf(d_real);
 }
@@ -524,6 +564,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = erf(d_int);
   transformed_param_real = erf(d_real);
   transformed_param_real = erf(p_real);
@@ -540,6 +581,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = erfc(d_int);
   transformed_data_real = erfc(d_real);
 }
@@ -549,6 +591,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = erfc(d_int);
   transformed_param_real = erfc(d_real);
   transformed_param_real = erfc(p_real);
@@ -565,6 +608,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = exp(d_int);
   transformed_data_real = exp(d_real);
 }
@@ -574,6 +618,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = exp(d_int);
   transformed_param_real = exp(d_real);
   transformed_param_real = exp(p_real);
@@ -590,6 +635,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = exp2(d_int);
   transformed_data_real = exp2(d_real);
 }
@@ -599,6 +645,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = exp2(d_int);
   transformed_param_real = exp2(d_real);
   transformed_param_real = exp2(p_real);
@@ -615,6 +662,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = expm1(d_int);
   transformed_data_real = expm1(d_real);
 }
@@ -624,6 +672,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = expm1(d_int);
   transformed_param_real = expm1(d_real);
   transformed_param_real = expm1(p_real);
@@ -640,6 +689,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = fabs(d_int);
   transformed_data_real = fabs(d_real);
 }
@@ -649,6 +699,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = fabs(d_int);
   transformed_param_real = fabs(d_real);
   transformed_param_real = fabs(p_real);
@@ -665,6 +716,7 @@ data {
 }
 transformed data {
   real transformed_data_real;
+  
   transformed_data_real = falling_factorial(d_real, d_int);
   transformed_data_real = falling_factorial(r_int, d_int);
 }
@@ -674,6 +726,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = falling_factorial(d_real, d_int);
   transformed_param_real = falling_factorial(r_int, d_int);
   transformed_param_real = falling_factorial(p_real, d_int);
@@ -692,6 +745,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = fdim(d_real, r_real);
   transformed_data_real = fdim(d_int, r_real);
   transformed_data_real = fdim(d_real, d_int);
@@ -703,10 +757,12 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = fdim(d_real, r_real);
   transformed_param_real = fdim(d_int, r_real);
   transformed_param_real = fdim(d_real, d_int);
   transformed_param_real = fdim(r_int, d_int);
+  
   transformed_param_real = fdim(r_int, p_real);
   transformed_param_real = fdim(r_real, p_real);
   transformed_param_real = fdim(p_real, p_real);
@@ -725,6 +781,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = floor(d_int);
   transformed_data_real = floor(d_real);
 }
@@ -734,6 +791,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = floor(d_int);
   transformed_param_real = floor(d_real);
   transformed_param_real = floor(p_real);
@@ -754,6 +812,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = fma(d_int, e_int, f_int);
   transformed_data_real = fma(d_real, d_int, e_int);
   transformed_data_real = fma(d_real, e_real, e_int);
@@ -769,6 +828,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = fma(d_int, e_int, f_int);
   transformed_param_real = fma(d_real, d_int, e_int);
   transformed_param_real = fma(d_real, e_real, e_int);
@@ -777,6 +837,7 @@ transformed parameters {
   transformed_param_real = fma(d_int, d_real, e_int);
   transformed_param_real = fma(d_int, d_real, e_real);
   transformed_param_real = fma(d_int, e_int, d_real);
+  
   transformed_param_real = fma(p_real, p_real, p_real);
   transformed_param_real = fma(p_real, p_real, d_real);
   transformed_param_real = fma(p_real, p_real, d_int);
@@ -812,6 +873,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = fmax(d_real, r_real);
   transformed_data_real = fmax(d_int, r_real);
   transformed_data_real = fmax(d_real, d_int);
@@ -823,10 +885,12 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = fmax(d_real, r_real);
   transformed_param_real = fmax(d_int, r_real);
   transformed_param_real = fmax(d_real, d_int);
   transformed_param_real = fmax(r_int, d_int);
+  
   transformed_param_real = fmax(r_int, p_real);
   transformed_param_real = fmax(r_real, p_real);
   transformed_param_real = fmax(p_real, p_real);
@@ -847,6 +911,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = fmin(d_real, r_real);
   transformed_data_real = fmin(d_int, r_real);
   transformed_data_real = fmin(d_real, d_int);
@@ -858,10 +923,12 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = fmin(d_real, r_real);
   transformed_param_real = fmin(d_int, r_real);
   transformed_param_real = fmin(d_real, d_int);
   transformed_param_real = fmin(r_int, d_int);
+  
   transformed_param_real = fmin(r_int, p_real);
   transformed_param_real = fmin(r_real, p_real);
   transformed_param_real = fmin(p_real, p_real);
@@ -882,6 +949,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = fmod(d_real, r_real);
   transformed_data_real = fmod(d_int, r_real);
   transformed_data_real = fmod(d_real, d_int);
@@ -893,10 +961,12 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = fmod(d_real, r_real);
   transformed_param_real = fmod(d_int, r_real);
   transformed_param_real = fmod(d_real, d_int);
   transformed_param_real = fmod(r_int, d_int);
+  
   transformed_param_real = fmod(r_int, p_real);
   transformed_param_real = fmod(r_real, p_real);
   transformed_param_real = fmod(p_real, p_real);
@@ -917,6 +987,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = gamma_p(d_real, r_real);
   transformed_data_real = gamma_p(d_int, r_real);
   transformed_data_real = gamma_p(d_real, d_int);
@@ -928,10 +999,12 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = gamma_p(d_real, r_real);
   transformed_param_real = gamma_p(d_int, r_real);
   transformed_param_real = gamma_p(d_real, d_int);
   transformed_param_real = gamma_p(r_int, d_int);
+  
   transformed_param_real = gamma_p(r_int, p_real);
   transformed_param_real = gamma_p(r_real, p_real);
   transformed_param_real = gamma_p(p_real, p_real);
@@ -952,6 +1025,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = gamma_q(d_real, r_real);
   transformed_data_real = gamma_q(d_int, r_real);
   transformed_data_real = gamma_q(d_real, d_int);
@@ -963,10 +1037,12 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = gamma_q(d_real, r_real);
   transformed_param_real = gamma_q(d_int, r_real);
   transformed_param_real = gamma_q(d_real, d_int);
   transformed_param_real = gamma_q(r_int, d_int);
+  
   transformed_param_real = gamma_q(r_int, p_real);
   transformed_param_real = gamma_q(r_real, p_real);
   transformed_param_real = gamma_q(p_real, p_real);
@@ -975,6 +1051,82 @@ transformed parameters {
 }
 model {
   y_p ~ normal(0, 1);
+}
+
+  $ ../../../../../../../install/default/bin/stanc --auto-format get_imag.stan
+data {
+  complex d_complex;
+}
+transformed data {
+  real td_real;
+  complex td_complex = 1;
+  
+  td_real = get_imag(d_complex);
+  td_real = get_imag(td_complex);
+}
+parameters {
+  complex p_complex;
+  real y_p;
+}
+transformed parameters {
+  real tp_real;
+  complex tp_complex;
+  
+  tp_real = get_imag(d_complex);
+  tp_real = get_imag(td_complex);
+  tp_real = get_imag(p_complex);
+  tp_real = get_imag(tp_complex);
+}
+model {
+  y_p ~ normal(0, 1);
+}
+generated quantities {
+  real gq_real;
+  complex gq_complex = 1;
+  
+  gq_real = get_imag(d_complex);
+  gq_real = get_imag(td_complex);
+  gq_real = get_imag(p_complex);
+  gq_real = get_imag(tp_complex);
+  gq_real = get_imag(gq_complex);
+}
+
+  $ ../../../../../../../install/default/bin/stanc --auto-format get_real.stan
+data {
+  complex d_complex;
+}
+transformed data {
+  real td_real;
+  complex td_complex = 1;
+  
+  td_real = get_real(d_complex);
+  td_real = get_real(td_complex);
+}
+parameters {
+  complex p_complex;
+  real y_p;
+}
+transformed parameters {
+  real tp_real;
+  complex tp_complex;
+  
+  tp_real = get_real(d_complex);
+  tp_real = get_real(td_complex);
+  tp_real = get_real(p_complex);
+  tp_real = get_real(tp_complex);
+}
+model {
+  y_p ~ normal(0, 1);
+}
+generated quantities {
+  real gq_real;
+  complex gq_complex = 1;
+  
+  gq_real = get_real(d_complex);
+  gq_real = get_real(td_complex);
+  gq_real = get_real(p_complex);
+  gq_real = get_real(tp_complex);
+  gq_real = get_real(gq_complex);
 }
 
   $ ../../../../../../../install/default/bin/stanc --auto-format hmm_hidden_states_prob.stan
@@ -1001,6 +1153,7 @@ model {
 }
 generated quantities {
   matrix[K, N] prob_gen;
+  
   prob_gen = hmm_hidden_state_prob(log_omega, Gamma, rho);
   prob_gen = hmm_hidden_state_prob(log_omega_v, Gamma, rho);
   prob_gen = hmm_hidden_state_prob(log_omega, Gamma_v, rho);
@@ -1021,6 +1174,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = hypot(d_real, r_real);
   transformed_data_real = hypot(d_int, r_real);
   transformed_data_real = hypot(d_real, d_int);
@@ -1032,10 +1186,12 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = hypot(d_real, r_real);
   transformed_param_real = hypot(d_int, r_real);
   transformed_param_real = hypot(d_real, d_int);
   transformed_param_real = hypot(r_int, d_int);
+  
   transformed_param_real = hypot(r_int, p_real);
   transformed_param_real = hypot(r_real, p_real);
   transformed_param_real = hypot(p_real, p_real);
@@ -1054,6 +1210,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = if_else(d_int, d_int, d_int);
   transformed_data_real = if_else(d_int, d_int, d_real);
   transformed_data_real = if_else(d_int, d_real, d_real);
@@ -1065,11 +1222,13 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = if_else(d_int, d_int, d_int);
   ;
   transformed_param_real = if_else(d_int, d_int, d_real);
   transformed_param_real = if_else(d_int, d_real, d_real);
   transformed_param_real = if_else(d_int, d_real, d_int);
+  
   transformed_param_real = if_else(d_int, d_int, p_real);
   transformed_param_real = if_else(d_int, p_real, d_int);
   transformed_param_real = if_else(d_int, d_real, p_real);
@@ -1131,6 +1290,7 @@ data {
 }
 transformed data {
   int transformed_data_int;
+  
   transformed_data_int = int_step(d_int);
 }
 parameters {
@@ -1141,13 +1301,14 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
-  transformed_param_real = int_step(rows(d_vector));
+  
+  transformed_param_real = int_step(rows(d_vector)); // using int_step to test integer output
   transformed_param_real = int_step(rows(p_vector));
   transformed_param_real = int_step(rows(d_row_vector));
   transformed_param_real = int_step(rows(p_row_vector));
   transformed_param_real = int_step(rows(d_matrix));
   transformed_param_real = int_step(rows(p_matrix));
-  transformed_param_real = int_step(cols(d_vector));
+  transformed_param_real = int_step(cols(d_vector)); // using int_step to test integer output
   transformed_param_real = int_step(cols(p_vector));
   transformed_param_real = int_step(cols(d_row_vector));
   transformed_param_real = int_step(cols(p_row_vector));
@@ -1175,6 +1336,7 @@ parameters {
 model {
   real y = integrate_1d(integrand, 0, 1, x, x_r, x_i);
   real z = integrate_1d(integrand, 0, 1, x, x_r, x_i, 1e-8);
+  
   x ~ normal(y + z, 1.0);
 }
 
@@ -1186,6 +1348,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = inv(d_int);
   transformed_data_real = inv(d_real);
 }
@@ -1195,6 +1358,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = inv(d_int);
   transformed_param_real = inv(d_real);
   transformed_param_real = inv(p_real);
@@ -1211,6 +1375,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = inv_cloglog(d_int);
   transformed_data_real = inv_cloglog(d_real);
 }
@@ -1220,6 +1385,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = inv_cloglog(d_int);
   transformed_param_real = inv_cloglog(d_real);
   transformed_param_real = inv_cloglog(p_real);
@@ -1236,6 +1402,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = inv_logit(d_int);
   transformed_data_real = inv_logit(d_real);
 }
@@ -1245,6 +1412,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = inv_logit(d_int);
   transformed_param_real = inv_logit(d_real);
   transformed_param_real = inv_logit(p_real);
@@ -1261,6 +1429,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = inv_Phi(d_int);
   transformed_data_real = inv_Phi(d_real);
 }
@@ -1270,6 +1439,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = inv_Phi(d_int);
   transformed_param_real = inv_Phi(d_real);
   transformed_param_real = inv_Phi(p_real);
@@ -1286,6 +1456,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = inv_sqrt(d_int);
   transformed_data_real = inv_sqrt(d_real);
 }
@@ -1295,6 +1466,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = inv_sqrt(d_int);
   transformed_param_real = inv_sqrt(d_real);
   transformed_param_real = inv_sqrt(p_real);
@@ -1311,6 +1483,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = inv_square(d_int);
   transformed_data_real = inv_square(d_real);
 }
@@ -1320,6 +1493,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = inv_square(d_int);
   transformed_param_real = inv_square(d_real);
   transformed_param_real = inv_square(p_real);
@@ -1335,6 +1509,7 @@ data {
 }
 transformed data {
   real transformed_data_real;
+  
   transformed_data_real = if_else(is_inf(d_real), d_int, d_int);
   transformed_data_real = if_else(is_inf(d_real), d_int, d_real);
   transformed_data_real = if_else(is_inf(d_real), d_real, d_real);
@@ -1346,11 +1521,13 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = if_else(is_inf(d_real), d_int, d_int);
   ;
   transformed_param_real = if_else(is_inf(d_real), d_int, d_real);
   transformed_param_real = if_else(is_inf(d_real), d_real, d_real);
   transformed_param_real = if_else(is_inf(d_real), d_real, d_int);
+  
   transformed_param_real = if_else(is_inf(d_real), d_int, p_real);
   transformed_param_real = if_else(is_inf(d_real), p_real, d_int);
   transformed_param_real = if_else(is_inf(d_real), d_real, p_real);
@@ -1381,6 +1558,7 @@ data {
 }
 transformed data {
   real transformed_data_real;
+  
   transformed_data_real = if_else(is_nan(d_real), d_int, d_int);
   transformed_data_real = if_else(is_nan(d_real), d_int, d_real);
   transformed_data_real = if_else(is_nan(d_real), d_real, d_real);
@@ -1392,11 +1570,13 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = if_else(is_nan(d_real), d_int, d_int);
   ;
   transformed_param_real = if_else(is_nan(d_real), d_int, d_real);
   transformed_param_real = if_else(is_nan(d_real), d_real, d_real);
   transformed_param_real = if_else(is_nan(d_real), d_real, d_int);
+  
   transformed_param_real = if_else(is_nan(d_real), d_int, p_real);
   transformed_param_real = if_else(is_nan(d_real), p_real, d_int);
   transformed_param_real = if_else(is_nan(d_real), d_real, p_real);
@@ -1501,6 +1681,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = lambert_w0(d_int);
   transformed_data_real = lambert_w0(d_real);
   transformed_data_real = lambert_wm1(d_int);
@@ -1512,6 +1693,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = lambert_w0(d_int);
   transformed_param_real = lambert_w0(d_real);
   transformed_param_real = lambert_w0(p_real);
@@ -1534,6 +1716,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = lbeta(d_real, r_real);
   transformed_data_real = lbeta(d_int, r_real);
   transformed_data_real = lbeta(d_real, d_int);
@@ -1545,10 +1728,12 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = lbeta(d_real, r_real);
   transformed_param_real = lbeta(d_int, r_real);
   transformed_param_real = lbeta(d_real, d_int);
   transformed_param_real = lbeta(r_int, d_int);
+  
   transformed_param_real = lbeta(r_int, p_real);
   transformed_param_real = lbeta(r_real, p_real);
   transformed_param_real = lbeta(p_real, p_real);
@@ -1567,6 +1752,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = lgamma(d_int);
   transformed_data_real = lgamma(d_real);
 }
@@ -1576,6 +1762,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = lgamma(d_int);
   transformed_param_real = lgamma(d_real);
   transformed_param_real = lgamma(p_real);
@@ -1593,6 +1780,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = lmgamma(d_int, r_int);
   transformed_data_real = lmgamma(d_int, d_real);
 }
@@ -1602,6 +1790,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = lmgamma(d_int, r_int);
   transformed_param_real = lmgamma(d_int, d_real);
   transformed_param_real = lmgamma(d_int, p_real);
@@ -1618,6 +1807,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = log(d_int);
   transformed_data_real = log(d_real);
 }
@@ -1627,6 +1817,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = log(d_int);
   transformed_param_real = log(d_real);
   transformed_param_real = log(p_real);
@@ -1643,6 +1834,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = log10(d_int);
   transformed_data_real = log10(d_real);
 }
@@ -1652,6 +1844,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = log10(d_int);
   transformed_param_real = log10(d_real);
   transformed_param_real = log10(p_real);
@@ -1668,6 +1861,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = log1m(d_int);
   transformed_data_real = log1m(d_real);
 }
@@ -1677,6 +1871,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = log1m(d_int);
   transformed_param_real = log1m(d_real);
   transformed_param_real = log1m(p_real);
@@ -1693,6 +1888,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = log1m_exp(d_int);
   transformed_data_real = log1m_exp(d_real);
 }
@@ -1702,6 +1898,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = log1m_exp(d_int);
   transformed_param_real = log1m_exp(d_real);
   transformed_param_real = log1m_exp(p_real);
@@ -1718,6 +1915,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = log1m_inv_logit(d_int);
   transformed_data_real = log1m_inv_logit(d_real);
 }
@@ -1727,6 +1925,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = log1m_inv_logit(d_int);
   transformed_param_real = log1m_inv_logit(d_real);
   transformed_param_real = log1m_inv_logit(p_real);
@@ -1743,6 +1942,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = log1p(d_int);
   transformed_data_real = log1p(d_real);
 }
@@ -1752,6 +1952,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = log1p(d_int);
   transformed_param_real = log1p(d_real);
   transformed_param_real = log1p(p_real);
@@ -1768,6 +1969,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = log1p_exp(d_int);
   transformed_data_real = log1p_exp(d_real);
 }
@@ -1777,6 +1979,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = log1p_exp(d_int);
   transformed_param_real = log1p_exp(d_real);
   transformed_param_real = log1p_exp(p_real);
@@ -1793,6 +1996,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = log2(d_int);
   transformed_data_real = log2(d_real);
 }
@@ -1802,6 +2006,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = log2(d_int);
   transformed_param_real = log2(d_real);
   transformed_param_real = log2(p_real);
@@ -1820,6 +2025,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = log_diff_exp(d_real, r_real);
   transformed_data_real = log_diff_exp(d_int, r_real);
   transformed_data_real = log_diff_exp(d_real, d_int);
@@ -1831,10 +2037,12 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = log_diff_exp(d_real, r_real);
   transformed_param_real = log_diff_exp(d_int, r_real);
   transformed_param_real = log_diff_exp(d_real, d_int);
   transformed_param_real = log_diff_exp(r_int, d_int);
+  
   transformed_param_real = log_diff_exp(r_int, p_real);
   transformed_param_real = log_diff_exp(r_real, p_real);
   transformed_param_real = log_diff_exp(p_real, p_real);
@@ -1855,6 +2063,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = log_falling_factorial(d_real, r_real);
   transformed_data_real = log_falling_factorial(d_int, r_real);
   transformed_data_real = log_falling_factorial(d_real, d_int);
@@ -1866,10 +2075,12 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = log_falling_factorial(d_real, r_real);
   transformed_param_real = log_falling_factorial(d_int, r_real);
   transformed_param_real = log_falling_factorial(d_real, d_int);
   transformed_param_real = log_falling_factorial(r_int, d_int);
+  
   transformed_param_real = log_falling_factorial(r_int, p_real);
   transformed_param_real = log_falling_factorial(r_real, p_real);
   transformed_param_real = log_falling_factorial(p_real, p_real);
@@ -1888,6 +2099,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = log_inv_logit(d_int);
   transformed_data_real = log_inv_logit(d_real);
 }
@@ -1897,6 +2109,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = log_inv_logit(d_int);
   transformed_param_real = log_inv_logit(d_real);
   transformed_param_real = log_inv_logit(p_real);
@@ -1924,17 +2137,21 @@ data {
 }
 transformed data {
   real transformed_data_real;
+  
   transformed_data_real = log_mix(d_real_theta, d_real_lam_1, d_real_lam_1);
+  
   transformed_data_real = log_mix(d_real_theta_arr, d_real_lam_arr);
   transformed_data_real = log_mix(d_real_theta_arr, d_vec_lam);
   transformed_data_real = log_mix(d_real_theta_arr, d_rowvec_lam);
   transformed_data_real = log_mix(d_real_theta_arr, d_vec_lam_arr);
   transformed_data_real = log_mix(d_real_theta_arr, d_rowvec_lam_arr);
+  
   transformed_data_real = log_mix(d_vec_theta, d_real_lam_arr);
   transformed_data_real = log_mix(d_vec_theta, d_vec_lam);
   transformed_data_real = log_mix(d_vec_theta, d_rowvec_lam);
   transformed_data_real = log_mix(d_vec_theta, d_vec_lam_arr);
   transformed_data_real = log_mix(d_vec_theta, d_rowvec_lam_arr);
+  
   transformed_data_real = log_mix(d_rowvec_theta, d_real_lam_arr);
   transformed_data_real = log_mix(d_rowvec_theta, d_vec_lam);
   transformed_data_real = log_mix(d_rowvec_theta, d_rowvec_lam);
@@ -1956,6 +2173,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = log_mix(p_real_theta, p_real_lam_1, d_real_lam_1);
   transformed_param_real = log_mix(p_real_theta, d_real_lam_1, p_real_lam_1);
   transformed_param_real = log_mix(p_real_theta, d_real_lam_1, d_real_lam_1);
@@ -1963,46 +2181,55 @@ transformed parameters {
   transformed_param_real = log_mix(d_real_theta, p_real_lam_1, d_real_lam_1);
   transformed_param_real = log_mix(d_real_theta, d_real_lam_1, p_real_lam_1);
   transformed_param_real = log_mix(p_real_theta, p_real_lam_1, p_real_lam_1);
+  
   transformed_param_real = log_mix(d_real_theta_arr, p_real_lam_arr);
   transformed_param_real = log_mix(d_real_theta_arr, p_vec_lam);
   transformed_param_real = log_mix(d_real_theta_arr, p_rowvec_lam);
   transformed_param_real = log_mix(d_real_theta_arr, p_vec_lam_arr);
   transformed_param_real = log_mix(d_real_theta_arr, p_rowvec_lam_arr);
+  
   transformed_param_real = log_mix(p_real_theta_arr, d_real_lam_arr);
   transformed_param_real = log_mix(p_real_theta_arr, d_vec_lam);
   transformed_param_real = log_mix(p_real_theta_arr, d_rowvec_lam);
   transformed_param_real = log_mix(p_real_theta_arr, d_vec_lam_arr);
   transformed_param_real = log_mix(p_real_theta_arr, d_rowvec_lam_arr);
+  
   transformed_param_real = log_mix(p_real_theta_arr, p_real_lam_arr);
   transformed_param_real = log_mix(p_real_theta_arr, p_vec_lam);
   transformed_param_real = log_mix(p_real_theta_arr, p_rowvec_lam);
   transformed_param_real = log_mix(p_real_theta_arr, p_vec_lam_arr);
   transformed_param_real = log_mix(p_real_theta_arr, p_rowvec_lam_arr);
+  
   transformed_param_real = log_mix(d_vec_theta, p_real_lam_arr);
   transformed_param_real = log_mix(d_vec_theta, p_vec_lam);
   transformed_param_real = log_mix(d_vec_theta, p_rowvec_lam);
   transformed_param_real = log_mix(d_vec_theta, p_vec_lam_arr);
   transformed_param_real = log_mix(d_vec_theta, p_rowvec_lam_arr);
+  
   transformed_param_real = log_mix(p_vec_theta, d_real_lam_arr);
   transformed_param_real = log_mix(p_vec_theta, d_vec_lam);
   transformed_param_real = log_mix(p_vec_theta, d_rowvec_lam);
   transformed_param_real = log_mix(p_vec_theta, d_vec_lam_arr);
   transformed_param_real = log_mix(p_vec_theta, d_rowvec_lam_arr);
+  
   transformed_param_real = log_mix(p_vec_theta, p_real_lam_arr);
   transformed_param_real = log_mix(p_vec_theta, p_vec_lam);
   transformed_param_real = log_mix(p_vec_theta, p_rowvec_lam);
   transformed_param_real = log_mix(p_vec_theta, p_vec_lam_arr);
   transformed_param_real = log_mix(p_vec_theta, p_rowvec_lam_arr);
+  
   transformed_param_real = log_mix(d_rowvec_theta, p_real_lam_arr);
   transformed_param_real = log_mix(d_rowvec_theta, p_vec_lam);
   transformed_param_real = log_mix(d_rowvec_theta, p_rowvec_lam);
   transformed_param_real = log_mix(d_rowvec_theta, p_vec_lam_arr);
   transformed_param_real = log_mix(d_rowvec_theta, p_rowvec_lam_arr);
+  
   transformed_param_real = log_mix(p_rowvec_theta, d_real_lam_arr);
   transformed_param_real = log_mix(p_rowvec_theta, d_vec_lam);
   transformed_param_real = log_mix(p_rowvec_theta, d_rowvec_lam);
   transformed_param_real = log_mix(p_rowvec_theta, d_vec_lam_arr);
   transformed_param_real = log_mix(p_rowvec_theta, d_rowvec_lam_arr);
+  
   transformed_param_real = log_mix(p_rowvec_theta, p_real_lam_arr);
   transformed_param_real = log_mix(p_rowvec_theta, p_vec_lam);
   transformed_param_real = log_mix(p_rowvec_theta, p_rowvec_lam);
@@ -2023,6 +2250,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = log_rising_factorial(d_real, r_real);
   transformed_data_real = log_rising_factorial(d_int, r_real);
   transformed_data_real = log_rising_factorial(d_real, d_int);
@@ -2034,10 +2262,12 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = log_rising_factorial(d_real, r_real);
   transformed_param_real = log_rising_factorial(d_int, r_real);
   transformed_param_real = log_rising_factorial(d_real, d_int);
   transformed_param_real = log_rising_factorial(r_int, d_int);
+  
   transformed_param_real = log_rising_factorial(r_int, p_real);
   transformed_param_real = log_rising_factorial(r_real, p_real);
   transformed_param_real = log_rising_factorial(p_real, p_real);
@@ -2058,6 +2288,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = log_sum_exp(d_real, r_real);
   transformed_data_real = log_sum_exp(d_int, r_real);
   transformed_data_real = log_sum_exp(d_real, d_int);
@@ -2069,10 +2300,12 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = log_sum_exp(d_real, r_real);
   transformed_param_real = log_sum_exp(d_int, r_real);
   transformed_param_real = log_sum_exp(d_real, d_int);
   transformed_param_real = log_sum_exp(r_int, d_int);
+  
   transformed_param_real = log_sum_exp(r_int, p_real);
   transformed_param_real = log_sum_exp(r_real, p_real);
   transformed_param_real = log_sum_exp(p_real, p_real);
@@ -2091,6 +2324,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = logit(d_int);
   transformed_data_real = logit(d_real);
 }
@@ -2100,6 +2334,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = logit(d_int);
   transformed_param_real = logit(d_real);
   transformed_param_real = logit(p_real);
@@ -2116,6 +2351,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_int = max(d_int, d_int);
 }
 parameters {
@@ -2124,6 +2360,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = max(d_int, d_int);
 }
 model {
@@ -2138,6 +2375,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_int = min(d_int, d_int);
 }
 parameters {
@@ -2146,6 +2384,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = min(d_int, d_int);
 }
 model {
@@ -2161,6 +2400,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = modified_bessel_first_kind(d_int, r_int);
   transformed_data_real = modified_bessel_first_kind(d_int, d_real);
 }
@@ -2170,6 +2410,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = modified_bessel_first_kind(d_int, r_int);
   transformed_param_real = modified_bessel_first_kind(d_int, d_real);
   transformed_param_real = modified_bessel_first_kind(d_int, p_real);
@@ -2187,6 +2428,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = modified_bessel_second_kind(d_int, r_int);
   transformed_data_real = modified_bessel_second_kind(d_int, d_real);
 }
@@ -2196,6 +2438,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = modified_bessel_second_kind(d_int, r_int);
   transformed_param_real = modified_bessel_second_kind(d_int, d_real);
   transformed_param_real = modified_bessel_second_kind(d_int, p_real);
@@ -2214,6 +2457,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = multiply_log(d_real, r_real);
   transformed_data_real = multiply_log(d_int, r_real);
   transformed_data_real = multiply_log(d_real, d_int);
@@ -2225,10 +2469,12 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = multiply_log(d_real, r_real);
   transformed_param_real = multiply_log(d_int, r_real);
   transformed_param_real = multiply_log(d_real, d_int);
   transformed_param_real = multiply_log(r_int, d_int);
+  
   transformed_param_real = multiply_log(r_int, p_real);
   transformed_param_real = multiply_log(r_real, p_real);
   transformed_param_real = multiply_log(p_real, p_real);
@@ -2258,12 +2504,14 @@ data {
 }
 transformed data {
   int transformed_data_int;
+  
   transformed_data_int = d_int + d_int;
   transformed_data_int = d_int - d_int;
   transformed_data_int = d_int * d_int;
   transformed_data_int = d_int / d_int;
   transformed_data_int = d_int %/% d_int;
   transformed_data_int = d_int % d_int;
+  
   transformed_data_int = -d_int;
   transformed_data_int = +d_int;
 }
@@ -2272,12 +2520,14 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = d_int + d_int;
   transformed_param_real = d_int - d_int;
   transformed_param_real = d_int * d_int;
   transformed_param_real = d_int / d_int;
   transformed_param_real = d_int %/% d_int;
   transformed_param_real = d_int % d_int;
+  
   transformed_param_real = -d_int;
   transformed_param_real = +d_int;
 }
@@ -2285,13 +2535,13 @@ model {
   y_p ~ normal(0, 1);
 }
 
-Info: Found int division at 'operators_int.stan', line 10, column 25 to column 30:
+Warning in 'operators_int.stan', line 10, column 25: Found int division:
   d_int / d_int
 Values will be rounded towards zero. If rounding is not desired you can write
 the division as
   d_int * 1.0 / d_int
 If rounding is intended please use the integer division operator %/%.
-Info: Found int division at 'operators_int.stan', line 26, column 27 to column 32:
+Warning in 'operators_int.stan', line 26, column 27: Found int division:
   d_int / d_int
 Values will be rounded towards zero. If rounding is not desired you can write
 the division as
@@ -2304,6 +2554,7 @@ data {
 }
 transformed data {
   real transformed_data_real;
+  
   transformed_data_real = d_real + d_real;
   transformed_data_real = d_real + d_int;
   transformed_data_real = d_int + d_real;
@@ -2322,6 +2573,7 @@ transformed data {
   transformed_data_real = d_int / d_int;
   transformed_data_real = d_int %/% d_int;
   transformed_data_real = d_int % d_int;
+  
   transformed_data_real = -d_real;
   transformed_data_real = -d_int;
   transformed_data_real = +d_real;
@@ -2333,6 +2585,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = d_real + d_real;
   transformed_param_real = d_real + d_int;
   transformed_param_real = d_int + d_real;
@@ -2371,6 +2624,7 @@ transformed parameters {
   transformed_param_real = d_real / p_real;
   transformed_param_real = d_int / p_real;
   transformed_param_real = p_real / p_real;
+  
   transformed_param_real = -d_int;
   transformed_param_real = -d_real;
   transformed_param_real = -p_real;
@@ -2382,13 +2636,13 @@ model {
   y_p ~ normal(0, 1);
 }
 
-Info: Found int division at 'operators_real.stan', line 23, column 26 to column 31:
+Warning in 'operators_real.stan', line 23, column 26: Found int division:
   d_int / d_int
 Values will be rounded towards zero. If rounding is not desired you can write
 the division as
   d_int * 1.0 / d_int
 If rounding is intended please use the integer division operator %/%.
-Info: Found int division at 'operators_real.stan', line 69, column 27 to column 32:
+Warning in 'operators_real.stan', line 69, column 27: Found int division:
   d_int / d_int
 Values will be rounded towards zero. If rounding is not desired you can write
 the division as
@@ -2404,6 +2658,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = owens_t(d_real, r_real);
   transformed_data_real = owens_t(d_int, r_real);
   transformed_data_real = owens_t(d_real, d_int);
@@ -2415,10 +2670,12 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = owens_t(d_real, r_real);
   transformed_param_real = owens_t(d_int, r_real);
   transformed_param_real = owens_t(d_real, d_int);
   transformed_param_real = owens_t(r_int, d_int);
+  
   transformed_param_real = owens_t(r_int, p_real);
   transformed_param_real = owens_t(r_real, p_real);
   transformed_param_real = owens_t(p_real, p_real);
@@ -2437,6 +2694,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = Phi(d_int);
   transformed_data_real = Phi(d_real);
 }
@@ -2446,6 +2704,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = Phi(d_int);
   transformed_param_real = Phi(d_real);
   transformed_param_real = Phi(p_real);
@@ -2462,6 +2721,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = Phi_approx(d_int);
   transformed_data_real = Phi_approx(d_real);
 }
@@ -2471,6 +2731,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = Phi_approx(d_int);
   transformed_param_real = Phi_approx(d_real);
   transformed_param_real = Phi_approx(p_real);
@@ -2489,6 +2750,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = pow(d_real, r_real);
   transformed_data_real = pow(d_int, r_real);
   transformed_data_real = pow(d_real, d_int);
@@ -2500,10 +2762,12 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = pow(d_real, r_real);
   transformed_param_real = pow(d_int, r_real);
   transformed_param_real = pow(d_real, d_int);
   transformed_param_real = pow(r_int, d_int);
+  
   transformed_param_real = pow(r_int, p_real);
   transformed_param_real = pow(r_real, p_real);
   transformed_param_real = pow(p_real, p_real);
@@ -2514,6 +2778,57 @@ model {
   y_p ~ normal(0, 1);
 }
 
+  $ ../../../../../../../install/default/bin/stanc --auto-format quantile.stan
+data {
+  int n;
+  int n_ps;
+  
+  array[n] real xs_array;
+  vector[n] xs_vec;
+  row_vector[n] xs_rowvec;
+  
+  array[n_ps] real<lower=0, upper=1> ps;
+  real<lower=0, upper=1> p;
+}
+transformed data {
+  real q;
+  array[n_ps] real qs;
+  
+  q = quantile(xs_array, p);
+  q = quantile(xs_vec, p);
+  q = quantile(xs_rowvec, p);
+  
+  qs = quantile(xs_array, ps);
+  qs = quantile(xs_vec, ps);
+  qs = quantile(xs_rowvec, ps);
+}
+parameters {
+  array[n] real xs_param_array;
+  vector[n] xs_param_vec;
+  row_vector[n] xs_param_rowvec;
+  
+  array[n_ps] real<lower=0, upper=1> ps_param;
+  real<lower=0, upper=1> p_param;
+}
+transformed parameters {
+  
+}
+model {
+  
+}
+generated quantities {
+  real q_pred;
+  array[n_ps] real qs_pred;
+  
+  q_pred = quantile(xs_param_array, p_param);
+  q_pred = quantile(xs_param_vec, p_param);
+  q_pred = quantile(xs_param_rowvec, p_param);
+  
+  qs_pred = quantile(xs_param_array, ps_param);
+  qs_pred = quantile(xs_param_vec, ps_param);
+  qs_pred = quantile(xs_param_rowvec, ps_param);
+}
+
   $ ../../../../../../../install/default/bin/stanc --auto-format rising_factorial.stan
 data {
   int d_int;
@@ -2522,6 +2837,7 @@ data {
 }
 transformed data {
   real transformed_data_real;
+  
   transformed_data_real = rising_factorial(d_real, d_int);
   transformed_data_real = rising_factorial(r_int, d_int);
 }
@@ -2531,6 +2847,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = rising_factorial(d_real, d_int);
   transformed_param_real = rising_factorial(r_int, d_int);
   transformed_param_real = rising_factorial(p_real, r_int);
@@ -2547,6 +2864,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = round(d_int);
   transformed_data_real = round(d_real);
 }
@@ -2556,6 +2874,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = round(d_int);
   transformed_param_real = round(d_real);
   transformed_param_real = round(p_real);
@@ -2572,6 +2891,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = sin(d_int);
   transformed_data_real = sin(d_real);
 }
@@ -2581,6 +2901,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = sin(d_int);
   transformed_param_real = sin(d_real);
   transformed_param_real = sin(p_real);
@@ -2597,6 +2918,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = sinh(d_int);
   transformed_data_real = sinh(d_real);
 }
@@ -2606,6 +2928,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = sinh(d_int);
   transformed_param_real = sinh(d_real);
   transformed_param_real = sinh(p_real);
@@ -2621,6 +2944,7 @@ data {
 }
 transformed data {
   real transformed_data_real;
+  
   transformed_data_real = not_a_number();
   transformed_data_real = positive_infinity();
   transformed_data_real = negative_infinity();
@@ -2632,6 +2956,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = not_a_number();
   transformed_param_real = positive_infinity();
   transformed_param_real = negative_infinity();
@@ -2649,6 +2974,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = sqrt(d_int);
   transformed_data_real = sqrt(d_real);
 }
@@ -2658,6 +2984,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = sqrt(d_int);
   transformed_param_real = sqrt(d_real);
   transformed_param_real = sqrt(p_real);
@@ -2674,6 +3001,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = square(d_int);
   transformed_data_real = square(d_real);
 }
@@ -2683,6 +3011,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = square(d_int);
   transformed_param_real = square(d_real);
   transformed_param_real = square(p_real);
@@ -2699,6 +3028,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = step(d_int);
   transformed_data_real = step(d_real);
 }
@@ -2708,6 +3038,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = step(d_int);
   transformed_param_real = step(d_real);
   transformed_param_real = step(p_real);
@@ -2724,6 +3055,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = tan(d_int);
   transformed_data_real = tan(d_real);
 }
@@ -2733,6 +3065,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = tan(d_int);
   transformed_param_real = tan(d_real);
   transformed_param_real = tan(p_real);
@@ -2749,6 +3082,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = tanh(d_int);
   transformed_data_real = tanh(d_real);
 }
@@ -2758,6 +3092,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = tanh(d_int);
   transformed_param_real = tanh(d_real);
   transformed_param_real = tanh(p_real);
@@ -2774,6 +3109,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = tgamma(d_int);
   transformed_data_real = tgamma(d_real);
 }
@@ -2783,9 +3119,56 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = tgamma(d_int);
   transformed_param_real = tgamma(d_real);
   transformed_param_real = tgamma(p_real);
+}
+model {
+  y_p ~ normal(0, 1);
+}
+
+  $ ../../../../../../../install/default/bin/stanc --auto-format to_complex.stan
+data {
+  int d_int;
+  int r_int;
+  real d_real;
+  real r_real;
+}
+transformed data {
+  complex transformed_data_complex;
+  complex transformed_data_complex_2;
+  
+  transformed_data_complex = to_complex(d_int, r_int);
+  transformed_data_complex = to_complex(d_real, r_int);
+  transformed_data_complex = to_complex(d_int, r_real);
+  transformed_data_complex = to_complex(d_real, r_real);
+  transformed_data_complex = to_complex(d_real);
+  transformed_data_complex = to_complex(d_int);
+  transformed_data_complex = to_complex();
+}
+parameters {
+  real p_real;
+  real y_p;
+}
+transformed parameters {
+  complex transformed_param_complex;
+  complex transformed_param_complex_2;
+  
+  transformed_param_complex = to_complex(d_int, r_int);
+  transformed_param_complex = to_complex(d_real, r_int);
+  transformed_param_complex = to_complex(d_int, r_real);
+  transformed_param_complex = to_complex(d_real, r_real);
+  transformed_param_complex = to_complex(d_real);
+  transformed_param_complex = to_complex(d_int);
+  transformed_param_complex = to_complex();
+  
+  transformed_param_complex = to_complex(p_real, r_int);
+  transformed_param_complex = to_complex(p_real, r_real);
+  transformed_param_complex = to_complex(r_int, p_real);
+  transformed_param_complex = to_complex(r_real, r_real);
+  transformed_param_complex = to_complex(p_real, p_real);
+  transformed_param_complex = to_complex(p_real);
 }
 model {
   y_p ~ normal(0, 1);
@@ -2799,6 +3182,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = trigamma(d_int);
   transformed_data_real = trigamma(d_real);
 }
@@ -2808,6 +3192,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = trigamma(d_int);
   transformed_param_real = trigamma(d_real);
   transformed_param_real = trigamma(p_real);
@@ -2824,6 +3209,7 @@ data {
 transformed data {
   int transformed_data_int;
   real transformed_data_real;
+  
   transformed_data_real = trunc(d_int);
   transformed_data_real = trunc(d_real);
 }
@@ -2833,6 +3219,7 @@ parameters {
 }
 transformed parameters {
   real transformed_param_real;
+  
   transformed_param_real = trunc(d_int);
   transformed_param_real = trunc(d_real);
   transformed_param_real = trunc(p_real);
