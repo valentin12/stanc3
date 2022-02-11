@@ -5,7 +5,6 @@ open Core_kernel
 open Middle
 open Ast
 open Debugging
-open Errors
 
 (* Takes a sized_basic_type and a list of sizes and repeatedly applies then
    SArray constructor, taking sizes off the list *)
@@ -21,30 +20,46 @@ let rec iterate_n f x = function
   | n -> iterate_n f (f x) (n - 1)
 let nest_unsized_array basic_type n =
   iterate_n (fun t -> UnsizedType.UArray t) basic_type n
+
+(* $sloc and $symbolstartpos generates code using !=, which
+    Core_kernel considers to be an error.
+ *)
+let (!=) = Stdlib.(!=)
 %}
 
-%token FUNCTIONBLOCK DATABLOCK TRANSFORMEDDATABLOCK PARAMETERSBLOCK
-       TRANSFORMEDPARAMETERSBLOCK MODELBLOCK GENERATEDQUANTITIESBLOCK
-%token LBRACE RBRACE LPAREN RPAREN LBRACK RBRACK LABRACK RABRACK COMMA SEMICOLON
-       BAR
-%token RETURN IF ELSE WHILE FOR IN BREAK CONTINUE PROFILE
-%token VOID INT REAL COMPLEX VECTOR ROWVECTOR ARRAY MATRIX ORDERED POSITIVEORDERED SIMPLEX
-       UNITVECTOR CHOLESKYFACTORCORR CHOLESKYFACTORCOV CORRMATRIX COVMATRIX
-%token LOWER UPPER OFFSET MULTIPLIER
-%token <string> INTNUMERAL
-%token <string> REALNUMERAL
-%token <string> IMAGNUMERAL
-%token <string> STRINGLITERAL
-%token <string> IDENTIFIER
-%token TARGET
-%token QMARK COLON BANG MINUS PLUS HAT ELTPOW TRANSPOSE TIMES DIVIDE MODULO IDIVIDE
-       LDIVIDE ELTTIMES ELTDIVIDE OR AND EQUALS NEQUALS LEQ GEQ TILDE
-%token ASSIGN PLUSASSIGN MINUSASSIGN TIMESASSIGN DIVIDEASSIGN
-   ELTDIVIDEASSIGN ELTTIMESASSIGN
-%token ARROWASSIGN INCREMENTLOGPROB GETLP (* all of these are deprecated *)
-%token PRINT REJECT
-%token TRUNCATE
-%token EOF
+(* Token definitions. The quoted strings are aliases, used in the examples generated in
+   parser.messages. They have no semantic meaning; see
+   http://gallium.inria.fr/~fpottier/menhir/manual.html#sec%3Atokens
+*)
+%token FUNCTIONBLOCK "functions" DATABLOCK "data"
+       TRANSFORMEDDATABLOCK "transformed data" PARAMETERSBLOCK "parameters"
+       TRANSFORMEDPARAMETERSBLOCK "transformed parameters" MODELBLOCK "model"
+       GENERATEDQUANTITIESBLOCK "generated quantities"
+%token LBRACE "{" RBRACE "}" LPAREN "(" RPAREN ")" LBRACK "[" RBRACK "]"
+       LABRACK "<" RABRACK ">" COMMA "," SEMICOLON ";" BAR "|"
+%token RETURN "return" IF "if" ELSE "else" WHILE "while" FOR "for" IN "in"
+       BREAK "break" CONTINUE "continue" PROFILE "profile"
+%token VOID "void" INT "int" REAL "real" COMPLEX "complex" VECTOR "vector"
+       ROWVECTOR "row_vector" ARRAY "array" MATRIX "matrix" ORDERED "ordered"
+       POSITIVEORDERED "positive_ordered" SIMPLEX "simplex" UNITVECTOR "unit_vector"
+       CHOLESKYFACTORCORR "cholesky_factor_corr" CHOLESKYFACTORCOV "cholesky_factor_cov"
+       CORRMATRIX "corr_matrix" COVMATRIX "cov_matrix"
+%token LOWER "lower" UPPER "upper" OFFSET "offset" MULTIPLIER "multiplier"
+%token <string> INTNUMERAL "24"
+%token <string> REALNUMERAL "3.1415"
+%token <string> IMAGNUMERAL "1i"
+%token <string> STRINGLITERAL "\"hello world\""
+%token <string> IDENTIFIER "foo"
+%token TARGET "target"
+%token QMARK "?" COLON ":" BANG "!" MINUS "-" PLUS "+" HAT "^" ELTPOW ".^" TRANSPOSE "'"
+       TIMES "*" DIVIDE "/" MODULO "%" IDIVIDE "%/%" LDIVIDE "\\" ELTTIMES ".*"
+       ELTDIVIDE "./" OR "||" AND "&&" EQUALS "==" NEQUALS "!=" LEQ "<=" GEQ ">=" TILDE "~"
+%token ASSIGN "=" PLUSASSIGN "+=" MINUSASSIGN "-=" TIMESASSIGN "*="
+       DIVIDEASSIGN "/=" ELTDIVIDEASSIGN "./=" ELTTIMESASSIGN ".*="
+%token ARROWASSIGN "<-" INCREMENTLOGPROB "increment_log_prob" GETLP "get_lp" (* all of these are deprecated *)
+%token PRINT "print" REJECT "reject"
+%token TRUNCATE "T"
+%token EOF ""
 
 (* UNREACHABLE tokens will never be produced by the lexer, so we can use them as
    "a thing that will never parse". This is useful in a few places. For example,
@@ -52,7 +67,7 @@ let nest_unsized_array basic_type n =
    error message purposes, we can partially accept one of them and then fail by
    requiring an UNREACHABLE token.
  *)
-%token UNREACHABLE
+%token UNREACHABLE "<<<<UNREACHABLE>>>"
 
 %right COMMA
 %right QMARK COLON
@@ -66,6 +81,7 @@ let nest_unsized_array basic_type n =
 %nonassoc unary_over_binary
 %right HAT ELTPOW
 %left TRANSPOSE
+%nonassoc ARRAY (* resolves shift-reduce with array keyword in declarations *)
 %left LBRACK
 %nonassoc below_ELSE
 %nonassoc ELSE
@@ -73,7 +89,6 @@ let nest_unsized_array basic_type n =
 (* Top level rule *)
 %start <Ast.untyped_program> program functions_only
 %%
-
 
 (* Grammar *)
 
@@ -93,7 +108,7 @@ program:
       let () =
         match (ofb, odb, otdb, opb, otpb, omb, ogb) with
         | None, None, None, None, None, None, None ->
-            Input_warnings.empty (fst $loc).pos_fname
+            Input_warnings.empty ($startpos).pos_fname
         | _ -> ()
       in
       { functionblock= ofb
@@ -160,14 +175,26 @@ generated_quantities_block:
 identifier:
   | id=IDENTIFIER { build_id id $loc }
   | TRUNCATE { build_id "T" $loc}
-  | OFFSET { build_id "offset" $loc}
-  | MULTIPLIER { build_id "multiplier" $loc}
-  | LOWER { build_id "lower" $loc}
-  | UPPER { build_id "upper" $loc}
-  | ARRAY { build_id "array" $loc}
+  | id_and_v = future_keyword
+    {
+      let id, v = id_and_v in
+      Input_warnings.future_keyword id.name v $loc;
+      id
+    }
+
+future_keyword:
+  | OFFSET { build_id "offset" $loc, "2.32.0" }
+  | MULTIPLIER { build_id "multiplier" $loc, "2.32.0" }
+  | LOWER { build_id "lower" $loc, "2.32.0" }
+  | UPPER { build_id "upper" $loc, "2.32.0" }
+  | ARRAY
+    { build_id "array" $loc, "2.32.0" }
 
 decl_identifier:
   | id=identifier { id }
+  | id=reserved_word { id }
+
+reserved_word:
   (* Keywords cannot be identifiers but
      semantic check produces a better error message. *)
   | FUNCTIONBLOCK { build_id "functions" $loc }
@@ -225,14 +252,15 @@ arg_decl:
     {  grammar_logger "arg_decl" ;
        match od with None -> (UnsizedType.AutoDiffable, ut, id) | _ -> (DataOnly, ut, id)  }
 
-always(x):
-  | x=x
-    { Some(x) }
-
 unsized_type:
-  | ARRAY n_opt=always(unsized_dims) bt=basic_type
+  | ARRAY n=unsized_dims bt=basic_type
+      {  grammar_logger "unsized_type";
+       nest_unsized_array bt n
+    }
   | bt=basic_type n_opt=option(unsized_dims)
     {  grammar_logger "unsized_type";
+       if Option.is_some n_opt then
+        Input_warnings.array_syntax ~unsized:true $loc;
        nest_unsized_array bt (Option.value n_opt ~default:0)
     }
 
@@ -291,11 +319,12 @@ decl(type_rule, rhs):
      We need to match it separately because we won't support multiple inline
      declarations using this form.
 
-     This form is likely TO BE DEPRECIATED in Stan 3
+     This form is deprecated.
    *)
   | ty=type_rule id=decl_identifier dims=dims rhs_opt=optional_assignment(rhs)
       SEMICOLON
-    { (fun ~is_global ->
+    { Input_warnings.array_syntax $loc;
+      (fun ~is_global ->
       [{ stmt=
           VarDecl {
               decl_type= Sized (reducearray (fst ty, dims))
@@ -315,38 +344,10 @@ decl(type_rule, rhs):
    *)
   (* Note that the array dimensions option must be inlined with ioption, else
      it will conflict with first rule. *)
-  (* It's a bit of a hack that "array[x,y,z]" is matched with a lhs rule and
-     then narrowed down by throwing errors. This is done to avoid reserving
-     "array" as a keyword, while also avoiding the reduce-reduce conflict that
-     would occur if "array[x,y,z]" were its own rule without reserving the
-     keyword. *)
-  | dims_opt=ioption(lhs) ty=type_rule
+  | dims_opt=ioption(arr_dims) ty=type_rule
      vs=separated_nonempty_list(COMMA, id_and_optional_assignment(rhs)) SEMICOLON
     { (fun ~is_global ->
-      let int_ix ix = match ix with
-        | Single e -> Some e
-        | _ -> None
-      in
-      let int_ixs ixs =
-        List.fold_left
-          ~init:(Some [])
-          ~f:(Option.map2 ~f:(fun ixs ix -> ix::ixs))
-          (List.map ~f:int_ix
-             (List.rev ixs))
-      in
-      let error message =
-        pp_syntax_error
-          Fmt.stderr
-          (Parsing (message, Location_span.of_positions_exn $loc(dims_opt) ));
-        exit 1
-      in
-      let dims = match dims_opt with
-        | Some ({expr= Indexed ({expr= Variable {name="array"; _}; _}, ixs); _}) ->
-           (match int_ixs ixs with
-            | Some sizes -> sizes
-            | None -> error "Dimensions should be expressions, not multiple or range indexing.")
-        | None -> []
-        | _ -> error "Found a declaration following an expression."
+      let dims = Option.value ~default:[] dims_opt
       in
       List.map vs ~f:(fun (id, rhs_opt) ->
           { stmt=
@@ -358,27 +359,7 @@ decl(type_rule, rhs):
                 ; is_global
                 }
           ; smeta= {
-              loc=
-                (* From the docs:
-                We remark that, if the current production has an empty right-hand side,
-                then $startpos and $endpos are equal, and (by convention) are the end
-                position of the most recently parsed symbol (that is, the symbol that
-                happens to be on top of the automaton’s stack when this production is
-                reduced). If the current production has a nonempty right-hand side,
-                then $startpos is the same as $startpos($1) and $endpos is the same
-                as $endpos($n), where n is the length of the right-hand side.
-
-
-                So when dims_opt is empty, it uses the preview token as its startpos,
-                but that makes the whole declaration think it starts at the previous
-                token. Sadly, $sloc and $symbolstartpos generates code using !=, which
-                Core_kernel considers to be an error.
-                 *)
-                let startpos = match dims_opt with
-                  | None -> $startpos(ty)
-                  | Some _ -> $startpos
-                in
-                Location_span.of_positions_exn (startpos, $endpos)
+              loc= Location_span.of_positions_exn $sloc
             }
           })
     )}
@@ -401,11 +382,11 @@ top_var_decl_no_assign:
       d_fn ~is_global:true
     }
   | SEMICOLON
-    { grammar_logger "top_var_decl_no_assign_skip"; 
+    { grammar_logger "top_var_decl_no_assign_skip";
       [ { stmt= Skip
         ; smeta= { loc= Location_span.of_positions_exn $loc
         }
-      }] 
+      }]
     }
 
 sized_basic_type:
@@ -493,9 +474,9 @@ offset_mult:
   | MULTIPLIER ASSIGN e=constr_expression
     { grammar_logger "multiplier" ; Multiplier e }
 
-(* arr_dims:
- *   | ARRAY LBRACK l=separated_nonempty_list(COMMA, expression) RBRACK
- *                { grammar_logger "array dims" ; l  } *)
+arr_dims:
+  | ARRAY LBRACK l=separated_nonempty_list(COMMA, expression) RBRACK
+    { grammar_logger "array dims" ; l  }
 
 dims:
   | LBRACK l=separated_nonempty_list(COMMA, expression) RBRACK
@@ -687,7 +668,7 @@ lhs:
   | id=identifier
     {  grammar_logger "lhs_identifier" ;
        {expr=Variable id
-       ;emeta = { loc=Location_span.of_positions_exn $loc}}
+       ;emeta = {loc=id.id_loc}}
     }
   | l=lhs LBRACK indices=indexes RBRACK
     {  grammar_logger "lhs_index" ;

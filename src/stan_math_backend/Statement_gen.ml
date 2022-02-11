@@ -1,4 +1,5 @@
 open Core_kernel
+open Core_kernel.Poly
 open Middle
 open Fmt
 open Expression_gen
@@ -7,13 +8,12 @@ let pp_call_str ppf (name, args) = pp_call ppf (name, string, args)
 let pp_block ppf (pp_body, body) = pf ppf "{@;<1 2>@[<v>%a@]@,}" pp_body body
 
 let pp_profile ppf (pp_body, name, body) =
-  let profile =
-    Fmt.strf
-      "profile<local_scalar_t__> profile__(%s, \
-       const_cast<profile_map&>(profiles__));"
-      name
-  in
-  pf ppf "{@;<1 2>@[<v>%s@;@;%a@]@,}" profile pp_body body
+  let profile ppf name =
+    pf ppf
+      "@[<hov 2>stan::math::profile<local_scalar_t__> profile__(%s,@ \
+       const_cast<stan::math::profile_map&>(profiles__));@]"
+      name in
+  pf ppf "{@;<1 2>@[<v>%a@;@;%a@]@,}" profile name pp_body body
 
 let rec contains_eigen (ut : UnsizedType.t) : bool =
   match ut with
@@ -26,11 +26,12 @@ let rec contains_eigen (ut : UnsizedType.t) : bool =
   * does not need to be filled as we are promised user input data has the correct
   * dimensions. Transformed data must be filled as incorrect slices could lead
   * to elements of objects in transform data not being set by the user.
-  *)
+*)
 let pp_filler ppf (decl_id, st, nan_type, needs_filled) =
   match (needs_filled, contains_eigen (SizedType.to_unsized st)) with
   | true, true ->
-      pf ppf "@[<hov 2>stan::math::fill(%s, %s);@]@," decl_id nan_type
+      pf ppf "@[<hov 2>stan::math::initialize_fill(%s, %s);@]@," decl_id
+        nan_type
   | _ -> ()
 
 (*Pretty print a sized type*)
@@ -50,51 +51,77 @@ let nan_type (st, adtype) =
  *)
 let rec pp_initialize ppf (st, adtype) =
   let init_nan = nan_type (st, adtype) in
-  match st with
-  | SizedType.SInt -> pf ppf "std::numeric_limits<int>::min()"
-  | SReal -> pf ppf "%s" init_nan
-  | SComplex ->
-      let scalar = local_scalar (SizedType.to_unsized st) adtype in
-      pf ppf "std::complex<%s>(%s, %s)" scalar init_nan init_nan
-  | SVector (_, d) | SRowVector (_, d) ->
-      pf ppf "%a(%a)" pp_st (st, adtype) pp_expr d
-  | SMatrix (_, d1, d2) ->
-      pf ppf "%a(%a, %a)" pp_st (st, adtype) pp_expr d1 pp_expr d2
-  | SArray (t, d) ->
-      pf ppf "%a(%a, %a)" pp_st (st, adtype) pp_expr d pp_initialize (t, adtype)
+  if adtype = UnsizedType.DataOnly then
+    match st with
+    | SizedType.SInt -> pf ppf "std::numeric_limits<int>::min()"
+    | SReal -> pf ppf "%s" init_nan
+    | SComplex ->
+        let scalar = local_scalar (SizedType.to_unsized st) adtype in
+        pf ppf "@[<hov 2>std::complex<%s>(%s,@ %s)@]" scalar init_nan init_nan
+    | SVector (_, size) | SRowVector (_, size) ->
+        pf ppf "@[<hov 2>%a::Constant(@,%a,@ %s)@]" pp_st (st, adtype) pp_expr
+          size init_nan
+    | SMatrix (_, d1, d2) ->
+        pf ppf "@[<hov 2>%a::Constant(@,%a,@ %a,@ %s)@]" pp_st (st, adtype)
+          pp_expr d1 pp_expr d2 init_nan
+    | SArray (t, d) ->
+        pf ppf "@[<hov 2>%a(@,%a,@ @,%a)@]" pp_st (st, adtype) pp_expr d
+          pp_initialize (t, adtype)
+  else
+    let ut = SizedType.to_unsized st in
+    match st with
+    | SizedType.SInt -> pf ppf "std::numeric_limits<int>::min()"
+    | SReal -> pf ppf "%s" init_nan
+    | SComplex ->
+        let scalar = local_scalar (SizedType.to_unsized st) adtype in
+        pf ppf "std::complex<%s>(%s, %s)" scalar init_nan init_nan
+    | SVector (AoS, size) | SRowVector (AoS, size) ->
+        pf ppf "@[<hov 2>%a::Constant(@,%a,@ %s)@]" pp_st (st, adtype) pp_expr
+          size init_nan
+    | SMatrix (AoS, d1, d2) ->
+        pf ppf "@[<hov 2>%a::Constant(@,%a,@ %a,@ %s)@]" pp_st (st, adtype)
+          pp_expr d1 pp_expr d2 init_nan
+    | SVector (SoA, size) ->
+        pf ppf "@[<hov 2>%a(@,%a)@]" pp_possibly_var_decl (adtype, ut, SoA)
+          pp_initialize
+          (SizedType.SVector (AoS, size), DataOnly)
+    | SRowVector (SoA, size) ->
+        pf ppf "@[<hov 2>%a(@,%a)@]" pp_possibly_var_decl (adtype, ut, SoA)
+          pp_initialize
+          (SizedType.SRowVector (AoS, size), DataOnly)
+    | SMatrix (SoA, d1, d2) ->
+        pf ppf "@[<hov 2>%a(@,%a)@]" pp_possibly_var_decl (adtype, ut, SoA)
+          pp_initialize
+          (SizedType.SMatrix (AoS, d1, d2), DataOnly)
+    | SArray (t, d) ->
+        pf ppf "@[<hov 2>%a(@,%a,@ @,%a)@]" pp_possibly_var_decl
+          (adtype, SizedType.to_unsized st, SizedType.get_mem_pattern t)
+          pp_expr d pp_initialize (t, adtype)
 
 (*Initialize an object of a given size.*)
-let pp_assign_sized ppf (decl_id, st, adtype, initialize) =
-  let init_nan = nan_type (st, adtype) in
-  let pp_assign ppf (decl_id, st, adtype) =
-    pf ppf "@[<hov 2>%s = %a;@]@," decl_id pp_initialize (st, adtype)
-  in
-  pf ppf "@[%a%a@]@," pp_assign (decl_id, st, adtype) pp_filler
-    (decl_id, st, init_nan, initialize)
+let pp_assign_sized ppf (st, adtype, initialize) =
+  if initialize then pf ppf "%a" pp_initialize (st, adtype) else pf ppf ""
 
 let%expect_test "set size mat array" =
   let int = Expr.Helpers.int in
   strf "@[<v>%a@]" pp_assign_sized
-    ( "d"
-    , SArray (SArray (SMatrix (AoS, int 2, int 3), int 4), int 5)
+    ( SArray (SArray (SMatrix (AoS, int 2, int 3), int 4), int 5)
     , DataOnly
     , false )
   |> print_endline ;
-  [%expect
-    {| d = std::vector<std::vector<Eigen::Matrix<double, -1, -1>>>(5, std::vector<Eigen::Matrix<double, -1, -1>>(4, Eigen::Matrix<double, -1, -1>(2, 3))); |}]
+  [%expect {| |}]
 
 let%expect_test "set size mat array" =
   let int = Expr.Helpers.int in
   strf "@[<v>%a@]" pp_assign_sized
-    ( "d"
-    , SArray (SArray (SMatrix (AoS, int 2, int 3), int 4), int 5)
-    , DataOnly
-    , true )
+    (SArray (SArray (SMatrix (AoS, int 2, int 3), int 4), int 5), DataOnly, true)
   |> print_endline ;
   [%expect
     {|
-    d = std::vector<std::vector<Eigen::Matrix<double, -1, -1>>>(5, std::vector<Eigen::Matrix<double, -1, -1>>(4, Eigen::Matrix<double, -1, -1>(2, 3)));
-    stan::math::fill(d, std::numeric_limits<double>::quiet_NaN()); |}]
+    std::vector<std::vector<Eigen::Matrix<double, -1, -1>>>(5,
+      std::vector<Eigen::Matrix<double, -1, -1>>(4,
+        Eigen::Matrix<double, -1, -1>::Constant(2, 3,
+          std::numeric_limits<double>::quiet_NaN()))) |}]
 
 (** Initialize Data and Transformed Data
   This function is used in the model's constructor to
@@ -108,61 +135,62 @@ let%expect_test "set size mat array" =
   @param st The type of the class member
  *)
 let pp_assign_data ppf
-    ((decl_id, st, needs_filled) : string * Expr.Typed.t SizedType.t * bool) =
-  let init_nan = nan_type (st, DataOnly) in
-  let pp_assign ppf (decl_id, st) =
-    match st with
-    | SizedType.SVector _ | SRowVector _ | SMatrix _ ->
-        pf ppf "@[<hov 2>%s__ = %a;@]@," decl_id pp_initialize (st, DataOnly)
-    | SInt | SReal | SComplex | SArray _ ->
-        pf ppf "@[<hov 2>%s = %a;@]@," decl_id pp_initialize (st, DataOnly)
-  in
+    ((decl_id, st, _) : string * Expr.Typed.t SizedType.t * bool) =
   let pp_placement_new ppf (decl_id, st) =
     match st with
     | SizedType.SVector (_, d) | SRowVector (_, d) ->
-        pf ppf "@[<hov 2>new (&%s) Eigen::Map<%a>(%s__.data(), %a);@]@,"
-          decl_id pp_st (st, DataOnly) decl_id pp_expr d
+        pf ppf "@[<hov 2>new (&%s) Eigen::Map<%a>(%s__.data(), %a);@]@," decl_id
+          pp_st (st, DataOnly) decl_id pp_expr d
     | SMatrix (_, d1, d2) ->
         pf ppf "@[<hov 2>new (&%s) Eigen::Map<%a>(%s__.data(), %a, %a);@]@,"
           decl_id pp_st (st, DataOnly) decl_id pp_expr d1 pp_expr d2
-    | _ -> ()
-  in
-  pf ppf "@[%a%a%a@]@," pp_assign (decl_id, st) pp_placement_new (decl_id, st)
-    pp_filler
-    (decl_id, st, init_nan, needs_filled)
+    | _ -> () in
+  let pp_underlying ppf (decl_id, st) =
+    match st with
+    | SizedType.SVector _ | SRowVector _ | SMatrix _ -> pf ppf "%s__" decl_id
+    | SInt | SReal | SComplex | SArray _ -> pf ppf "%s" decl_id in
+  pf ppf "@[<hov 2>%a = @,%a;@]@,@[<hov 2>%a@]@," pp_underlying (decl_id, st)
+    pp_assign_sized (st, DataOnly, true) pp_placement_new (decl_id, st)
 
 let%expect_test "set size map int array no initialize" =
   let int = Expr.Helpers.int in
-  strf "@[<v>%a@]" pp_assign_data
+  str "@[<v>%a@]" pp_assign_data
     ("darrmat", SArray (SArray (SInt, int 4), int 5), false)
   |> print_endline ;
   [%expect
     {|
-  darrmat = std::vector<std::vector<int>>(5, std::vector<int>(4, std::numeric_limits<int>::min())); |}]
+  darrmat =
+    std::vector<std::vector<int>>(5,
+      std::vector<int>(4, std::numeric_limits<int>::min())); |}]
 
 let%expect_test "set size map mat array" =
   let int = Expr.Helpers.int in
-  strf "@[<v>%a@]" pp_assign_data
+  str "@[<v>%a@]" pp_assign_data
     ( "darrmat"
     , SArray (SArray (SMatrix (AoS, int 2, int 3), int 4), int 5)
     , true )
   |> print_endline ;
   [%expect
     {|
-    darrmat = std::vector<std::vector<Eigen::Matrix<double, -1, -1>>>(5, std::vector<Eigen::Matrix<double, -1, -1>>(4, Eigen::Matrix<double, -1, -1>(2, 3)));
-    stan::math::fill(darrmat, std::numeric_limits<double>::quiet_NaN()); |}]
+    darrmat =
+      std::vector<std::vector<Eigen::Matrix<double, -1, -1>>>(5,
+        std::vector<Eigen::Matrix<double, -1, -1>>(4,
+          Eigen::Matrix<double, -1, -1>::Constant(2, 3,
+            std::numeric_limits<double>::quiet_NaN()))); |}]
 
 let%expect_test "set size map mat" =
   let int = Expr.Helpers.int in
-  strf "@[<v>%a@]" pp_assign_data ("dmat", SMatrix (AoS, int 2, int 3), false)
+  str "@[<v>%a@]" pp_assign_data ("dmat", SMatrix (AoS, int 2, int 3), false)
   |> print_endline ;
   [%expect
     {|
-    dmat__ = Eigen::Matrix<double, -1, -1>(2, 3);
+    dmat__ =
+      Eigen::Matrix<double, -1, -1>::Constant(2, 3,
+        std::numeric_limits<double>::quiet_NaN());
     new (&dmat) Eigen::Map<Eigen::Matrix<double, -1, -1>>(dmat__.data(), 2, 3); |}]
 
 let%expect_test "set size map int" =
-  strf "@[<v>%a@]" pp_assign_data ("dint", SInt, true) |> print_endline ;
+  str "@[<v>%a@]" pp_assign_data ("dint", SInt, true) |> print_endline ;
   [%expect {|
   dint = std::numeric_limits<int>::min(); |}]
 
@@ -191,8 +219,7 @@ let pp_data_decl ppf (vident, ut) =
     match opencl_check with
     | _, UnsizedType.(UInt | UReal) | false, _ -> pp_unsizedtype_local
     | true, UArray UInt -> fun ppf _ -> pf ppf "matrix_cl<int>"
-    | true, _ -> fun ppf _ -> pf ppf "matrix_cl<double>"
-  in
+    | true, _ -> fun ppf _ -> pf ppf "matrix_cl<double>" in
   match (opencl_check, ut) with
   | (false, _), ut -> (
     match ut with
@@ -224,31 +251,35 @@ let pp_map_decl ppf (vident, ut) =
       pf ppf "Eigen::Map<Eigen::Matrix<%s, -1, 1>> %s{nullptr, 0};" scalar
         vident
   | x ->
-      raise_s
+      Common.FatalError.fatal_error_msg
         [%message
           "Error during Map data construction for " vident " of type "
-            (x : UnsizedType.t)
-            ". This should never happen, if you see this please file a bug \
-             report."]
+            (x : UnsizedType.t)]
 
 let pp_unsized_decl ppf (vident, ut, adtype) =
   let pp_type =
     match (Transform_Mir.is_opencl_var vident, ut) with
     | _, UnsizedType.(UInt | UReal) | false, _ -> pp_unsizedtype_local
     | true, UArray UInt -> fun ppf _ -> pf ppf "matrix_cl<int>"
-    | true, _ -> fun ppf _ -> pf ppf "matrix_cl<double>"
-  in
+    | true, _ -> fun ppf _ -> pf ppf "matrix_cl<double>" in
   pf ppf "%a %s;" pp_type (adtype, ut) vident
+
+let pp_possibly_opencl_decl ppf (vident, st, adtype) =
+  let ut = SizedType.to_unsized st in
+  let mem_pattern = SizedType.get_mem_pattern st in
+  let pp_type =
+    match (Transform_Mir.is_opencl_var vident, ut) with
+    | _, UnsizedType.(UInt | UReal) | false, _ -> pp_possibly_var_decl
+    | true, UArray UInt -> fun ppf _ -> pf ppf "matrix_cl<int>"
+    | true, _ -> fun ppf _ -> pf ppf "matrix_cl<double>" in
+  pf ppf "%a %s" pp_type (adtype, ut, mem_pattern) vident
 
 let pp_sized_decl ppf (vident, st, adtype, initialize) =
   match initialize with
   | true ->
-      pf ppf "%a@,%a" pp_unsized_decl
-        (vident, SizedType.to_unsized st, adtype)
-        pp_assign_sized
-        (vident, st, adtype, initialize)
-  | false ->
-      pf ppf "%a" pp_unsized_decl (vident, SizedType.to_unsized st, adtype)
+      pf ppf "@[<hov 2>%a =@, %a;@]" pp_possibly_opencl_decl
+        (vident, st, adtype) pp_assign_sized (st, adtype, initialize)
+  | false -> pf ppf "%a;" pp_possibly_opencl_decl (vident, st, adtype)
 
 let pp_decl ppf (vident, pst, adtype, initialize) =
   match pst with
@@ -257,9 +288,10 @@ let pp_decl ppf (vident, pst, adtype, initialize) =
 
 let math_fn_translations = function
   | Internal_fun.FnLength -> Some ("length", [])
-  | FnValidateSize -> Some ("validate_non_negative_index", [])
-  | FnValidateSizeSimplex -> Some ("validate_positive_index", [])
-  | FnValidateSizeUnitVector -> Some ("validate_unit_vector_index", [])
+  | FnValidateSize -> Some ("stan::math::validate_non_negative_index", [])
+  | FnValidateSizeSimplex -> Some ("stan::math::validate_positive_index", [])
+  | FnValidateSizeUnitVector ->
+      Some ("stan::math::validate_unit_vector_index", [])
   | FnReadWriteEventsOpenCL x -> Some (x ^ ".wait_for_read_write_events", [])
   | _ -> None
 
@@ -269,10 +301,10 @@ let trans_math_fn f =
 
 let pp_bool_expr ppf expr =
   match Expr.Typed.type_of expr with
-  | UReal -> pp_call ppf ("as_bool", pp_expr, [expr])
+  | UReal -> pp_call ppf ("stan::math::as_bool", pp_expr, [expr])
   | _ -> pp_expr ppf expr
 
-let rec pp_statement (ppf : Format.formatter) Stmt.Fixed.({pattern; meta}) =
+let rec pp_statement (ppf : Format.formatter) Stmt.Fixed.{pattern; meta} =
   (* ({stmt; smeta} : (mtype_loc_ad, 'a) stmt_with) = *)
   let pp_stmt_list = list ~sep:cut pp_statement in
   ( match pattern with
@@ -281,11 +313,11 @@ let rec pp_statement (ppf : Format.formatter) Stmt.Fixed.({pattern; meta}) =
   match pattern with
   | Assignment
       ( (vident, _, [])
-      , ( { pattern= FunApp (CompilerInternal (FnReadData | FnReadParam _), _); _
-          } as rhs ) ) ->
+      , ( {pattern= FunApp (CompilerInternal (FnReadData | FnReadParam _), _); _}
+        as rhs ) ) ->
       pf ppf "@[<hov 4>%s = %a;@]" vident pp_expr rhs
   | Assignment
-      ((vident, _, []), ({meta= Expr.Typed.Meta.({type_= UInt; _}); _} as rhs))
+      ((vident, _, []), ({meta= Expr.Typed.Meta.{type_= UInt; _}; _} as rhs))
    |Assignment ((vident, _, []), ({meta= {type_= UReal; _}; _} as rhs)) ->
       pf ppf "@[<hov 4>%s = %a;@]" vident pp_expr rhs
   | Assignment ((assignee, UInt, idcs), rhs)
@@ -295,14 +327,13 @@ let rec pp_statement (ppf : Format.formatter) Stmt.Fixed.({pattern; meta}) =
         rhs
   | Assignment ((assignee, _, idcs), rhs) ->
       (* XXX I think in general we don't need to do a deepcopy if e is nested
-       inside some function call - the function should get its own copy
-       (in all cases???) *)
+         inside some function call - the function should get its own copy
+         (in all cases???) *)
       let rec maybe_deep_copy e =
         let recurse (e : 'a Expr.Fixed.t) =
           { e with
-            Expr.Fixed.pattern=
-              Expr.Fixed.Pattern.map maybe_deep_copy e.pattern }
-        in
+            Expr.Fixed.pattern= Expr.Fixed.Pattern.map maybe_deep_copy e.pattern
+          } in
         match e.pattern with
         | _ when UnsizedType.is_scalar_type (Expr.Typed.type_of e) -> e
         | FunApp (CompilerInternal _, _) -> e
@@ -310,16 +341,17 @@ let rec pp_statement (ppf : Format.formatter) Stmt.Fixed.({pattern; meta}) =
           when v = assignee ->
             { e with
               Expr.Fixed.pattern= FunApp (CompilerInternal FnDeepCopy, [e]) }
-        | _ -> recurse e
-      in
+        | _ -> recurse e in
       let rhs = maybe_deep_copy rhs in
-      pf ppf "@[<hov 2>assign(@,%s,@ %a,@ %S%s%a@]);" assignee pp_expr rhs
-        (strf "assigning variable %s" assignee)
+      pf ppf "@[<hov 2>stan::model::assign(@,%s,@ %a,@ %S%s%a@]);" assignee
+        pp_expr rhs
+        (str "assigning variable %s" assignee)
         (if List.length idcs = 0 then "" else ", ")
         pp_indexes idcs
   | TargetPE e -> pf ppf "@[<hov 2>lp_accum__.add(@,%a@]);" pp_expr e
   | NRFunApp (CompilerInternal FnPrint, args) ->
-      let pp_arg ppf a = pf ppf "stan_print(pstream__, %a);" pp_expr a in
+      let pp_arg ppf a =
+        pf ppf "stan::math::stan_print(pstream__, %a);" pp_expr a in
       let args = args @ [Expr.Helpers.str "\n"] in
       pf ppf "if (pstream__) %a" pp_block (list ~sep:cut pp_arg, args)
   | NRFunApp (CompilerInternal FnReject, args) ->
@@ -331,9 +363,18 @@ let rec pp_statement (ppf : Format.formatter) Stmt.Fixed.({pattern; meta}) =
   | NRFunApp (CompilerInternal (FnCheck {trans; var_name; var}), args) ->
       Option.iter (check_to_string trans) ~f:(fun check_name ->
           let function_arg = Expr.Helpers.variable "function__" in
-          pf ppf "%s(@[<hov>%a@]);" ("check_" ^ check_name)
-            (list ~sep:comma pp_expr)
-            (function_arg :: Expr.Helpers.str var_name :: var :: args) )
+          if List.length args = 0 then
+            pf ppf "%s(@[<hov 2>%a, %a,@, %a@]);"
+              ("stan::math::check_" ^ check_name)
+              pp_expr function_arg pp_expr
+              (Expr.Helpers.str var_name)
+              pp_expr var
+          else
+            pf ppf "%s(@[<hov 2>%a, %a,@, %a,@, %a@]);"
+              ("stan::math::check_" ^ check_name)
+              pp_expr function_arg pp_expr
+              (Expr.Helpers.str var_name)
+              pp_expr var (list ~sep:comma pp_expr) args )
   | NRFunApp (CompilerInternal (FnWriteParam {unconstrain_opt; var}), _) -> (
     match
       (unconstrain_opt, Option.bind ~f:constraint_to_string unconstrain_opt)
@@ -352,7 +393,9 @@ let rec pp_statement (ppf : Format.formatter) Stmt.Fixed.({pattern; meta}) =
       pf ppf "%s(@[<hov>%a@]);" fname (list ~sep:comma pp_expr)
         (extra_args @ args)
   | NRFunApp (StanLib (fname, _, _), args) ->
-      pf ppf "%s(@[<hov>%a@]);" fname (list ~sep:comma pp_expr) args
+      pf ppf "%s(@[<hov>%a@]);"
+        (stan_namespace_qualify fname)
+        (list ~sep:comma pp_expr) args
   | NRFunApp (UserDefined (fname, suffix), args) ->
       pf ppf "%a;" pp_user_defined_fun (fname, suffix, args)
   | Break -> string ppf "break;"
@@ -369,8 +412,9 @@ let rec pp_statement (ppf : Format.formatter) Stmt.Fixed.({pattern; meta}) =
       { body=
           { pattern=
               Assignment
-                (_, {pattern= FunApp (CompilerInternal (FnReadParam _), _); _}); _
-          } as body; _ } ->
+                (_, {pattern= FunApp (CompilerInternal (FnReadParam _), _); _})
+          ; _ } as body
+      ; _ } ->
       pp_statement ppf body
       (* Skip For loop part, just emit body due to the way FnReadParam emits *)
   | For {loopvar; lower; upper; body} ->

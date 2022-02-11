@@ -1,6 +1,5 @@
 (** MIR types and modules corresponding to the expressions of the language *)
 
-open Core_kernel
 open Common
 
 module Fixed : sig
@@ -16,6 +15,7 @@ module Fixed : sig
       | EAnd of 'a * 'a
       | EOr of 'a * 'a
       | Indexed of 'a * 'a Index.t list
+      | Promotion of 'a * UnsizedType.t * UnsizedType.autodifftype
     [@@deriving sexp, hash, compare]
 
     include Pattern.S with type 'a t := 'a t
@@ -40,7 +40,7 @@ module Typed : sig
   module Meta : sig
     type t =
       { type_: UnsizedType.t
-      ; loc: Location_span.t sexp_opaque [@compare.ignore]
+      ; loc: Location_span.t [@sexp.opaque] [@compare.ignore]
       ; adlevel: UnsizedType.autodifftype }
     [@@deriving compare, create, sexp, hash]
 
@@ -52,13 +52,14 @@ module Typed : sig
   val type_of : t -> UnsizedType.t
   val loc_of : t -> Location_span.t
   val adlevel_of : t -> UnsizedType.autodifftype
+  val fun_arg : t -> UnsizedType.autodifftype * UnsizedType.t
 end
 
 module Labelled : sig
   module Meta : sig
     type t =
       { type_: UnsizedType.t
-      ; loc: Location_span.t sexp_opaque [@compare.ignore]
+      ; loc: Location_span.t [@sexp.opaque] [@compare.ignore]
       ; adlevel: UnsizedType.autodifftype
       ; label: Label.Int_label.t }
     [@@deriving compare, create, sexp, hash]
