@@ -159,6 +159,19 @@ let variadic_dae_mandatory_fun_args =
 let variadic_dae_fun_return_type = UnsizedType.UVector
 let variadic_dae_return_type = UnsizedType.UArray UnsizedType.UVector
 
+let variadic_laplace_tol_arg_types =
+  [ (UnsizedType.DataOnly, UnsizedType.UReal); (DataOnly, UInt)
+  ; (DataOnly, UInt); (DataOnly, UInt); (DataOnly, UInt) ]
+
+let variadic_laplace_mandatory_arg_types =
+  [(UnsizedType.AutoDiffable, UnsizedType.UVector) ] (* theta_0 *)
+
+let variadic_laplace_mandatory_fun_args =
+  []
+
+let variadic_laplace_fun_return_type = UnsizedType.UMatrix
+let variadic_laplace_return_type = UnsizedType.UReal
+
 let mk_declarative_sig (fnkinds, name, args, mem_pattern) =
   let is_glm = String.is_suffix ~suffix:"_glm" name in
   let sfxes = function
@@ -230,7 +243,20 @@ let is_variadic_dae_fn f = Set.mem variadic_dae_fns f
 let is_variadic_dae_tol_fn f =
   is_variadic_dae_fn f && String.is_suffix f ~suffix:dae_tolerances_suffix
 
-let distributions =
+
+let is_variadic_laplace_fn_defs = String.Set.of_list 
+ ["laplace_marginal_neg_binomial_2_log_lpmf" 
+  ; "laplace_marginal_bernoulli_logit_lpmf"
+  ; "laplace_marginal_poisson_log_lpmf"]
+
+let is_variadic_laplace_fn x = Set.mem is_variadic_laplace_fn_defs x
+
+
+let is_variadic_laplace_tol_fn x = 
+  String.is_prefix ~prefix:"laplace_marginal" x && (String.is_suffix ~suffix:"_tol_lpmf" x || String.is_suffix ~suffix:"_tol_lpdf" x)
+
+
+  let distributions =
   [ ( full_lpmf
     , "beta_binomial"
     , [DVInt; DVInt; DVReal; DVReal]
@@ -379,6 +405,7 @@ let stan_math_returntype (name : string) (args : fun_arg list) =
   match name with
   | x when is_reduce_sum_fn x -> Some (UnsizedType.ReturnType UReal)
   | x when is_variadic_ode_fn x -> Some (UnsizedType.ReturnType (UArray UVector))
+  | x when is_variadic_laplace_fn x -> Some (UnsizedType.ReturnType (UnsizedType.UReal))
   | x when is_variadic_dae_fn x -> Some (UnsizedType.ReturnType (UArray UVector))
   | _ ->
       (* Return the least return type in case there are multiple options
@@ -546,6 +573,7 @@ let query_stan_math_mem_pattern_support (name : string) (args : fun_arg list) =
   | x when is_reduce_sum_fn x -> false
   | x when is_variadic_ode_fn x -> false
   | x when is_variadic_dae_fn x -> false
+  | x when is_variadic_laplace_fn x -> false
   | _ -> (
     (*    let printer intro s = Set.Poly.iter ~f:(printf intro) s in*)
     match List.length filteredmatches = 0 with

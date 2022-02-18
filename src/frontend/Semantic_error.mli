@@ -82,6 +82,14 @@ val illtyped_variadic_dae :
   -> SignatureMismatch.function_mismatch
   -> t
 
+val illtyped_variadic_laplace :
+    Location_span.t
+-> string
+-> UnsizedType.t list
+-> (UnsizedType.autodifftype * UnsizedType.t) list
+-> SignatureMismatch.function_mismatch
+-> t
+
 val nonreturning_fn_expected_returning_found : Location_span.t -> string -> t
 val nonreturning_fn_expected_nonfn_found : Location_span.t -> string -> t
 
