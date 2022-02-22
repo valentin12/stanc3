@@ -1,47 +1,46 @@
 functions {
-  matrix K (vector phi, vector[] x, real[] delta, int[] delta_int) {
+  matrix covar_fun (real alpha) {
     matrix[1, 1] covariance;
+    covariance[1, 1] = alpha;
     return covariance;
   }
 }
 
 transformed data {
-  int y[1];
-  int n_samples[1];
-  vector[1] ye;
+ array[1] int y;
+ array[1]  int n_samples;
+ vector[1] ye;
 
   vector[1] phi;
-  vector[1] x[1];
-  real delta[1];
-  int delta_int[1];
+  array[1] vector[1] x;
+  array[1] real delta;
+  array[1] int delta_int;
 
   vector[1] theta0;
 }
 
 parameters {
-  vector[1] phi_v;
+  real alpha;
   vector[1] theta0_v;
 }
 
 model {
   target +=
-    laplace_marginal_poisson_log_lpmf(y | n_samples, K, phi, x, delta, delta_int,
-                                 theta0);
+    laplace_marginal_poisson_log_lpmf(y | n_samples, covar_fun, theta0, alpha);
   target +=
-    laplace_marginal_poisson_log_lpmf(y | n_samples, ye, K, phi, x, delta, delta_int,
-                                 theta0);
+    laplace_marginal_poisson_log_lpmf(y | n_samples, ye, covar_fun, theta0, alpha);
 
-  y ~ laplace_marginal_poisson_log(n_samples, K, phi, x, delta, delta_int,
-                                   theta0);
+  y ~ laplace_marginal_poisson_log(n_samples, covar_fun, theta0, alpha);
 
-  y ~ laplace_marginal_poisson_log(n_samples, ye, K, phi, x, delta, delta_int,
-                                   theta0);
+  y ~ laplace_marginal_poisson_log(n_samples, ye, covar_fun, theta0, alpha);
 }
 
 generated quantities {
+  /*
   vector[1] theta_pred =
     laplace_poisson_log_rng(y, n_samples, K, phi, x, delta, delta_int,
                            theta0);
   theta_pred = laplace_poisson_log_rng(y, n_samples, ye, K, phi, x,
                                           delta, delta_int, theta0);
+ */
 }

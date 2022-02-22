@@ -198,14 +198,8 @@ let unique_minimum_promotion promotion_options =
     | [] -> Error None )
   | None -> Error None
 
-let matching_function env name args =
+let find_compatible_rt function_types args =
   (* NB: Variadic arguments are special-cased in the typechecker and not handled here *)
-  let name = Utils.stdlib_distribution_name name in
-  let function_types =
-    Environment.find env name
-    |> List.filter_map ~f:extract_function_types
-    |> List.sort ~compare:(fun (ret1, _, _, _) (ret2, _, _, _) ->
-           UnsizedType.compare_returntype ret1 ret2 ) in
   let matches, errors =
     List.partition_map function_types
       ~f:(fun (rt, tys, funkind_constructor, _) ->
@@ -224,6 +218,18 @@ let matching_function env name args =
       in
       let errors, omitted = List.split_n errors max_n_errors in
       SignatureErrors (errors, not (List.is_empty omitted))
+
+let matching_function env name args =
+  let name = Utils.stdlib_distribution_name name in
+  let function_types =
+    Environment.find env name
+    |> List.filter_map ~f:extract_function_types
+    |> List.sort ~compare:(fun (ret1, _, _, _) (ret2, _, _, _) ->
+           UnsizedType.compare_returntype ret1 ret2 ) in
+  find_compatible_rt function_types args
+
+let matching_stanlib_function =
+  matching_function Environment.stan_math_environment
 
 let check_variadic_args allow_lpdf mandatory_arg_tys mandatory_fun_arg_tys
     fun_return args =
@@ -244,6 +250,44 @@ let check_variadic_args allow_lpdf mandatory_arg_tys mandatory_fun_arg_tys
         TypeMismatch (minimal_func_type, func_type, Some x) |> wrap_err in
       let suffix = Fun_kind.without_propto suffix in
       if suffix = FnPlain || (allow_lpdf && suffix = FnLpdf ()) then
+        match check_compatible_arguments 1 mandatory mandatory_fun_arg_tys with
+        | Error x -> wrap_func_error (InputMismatch x)
+        | Ok _ -> (
+          match check_same_type 1 return_type fun_return with
+          | Error _ ->
+              wrap_func_error
+                (ReturnTypeMismatch
+                   (ReturnType fun_return, ReturnType return_type) )
+          | Ok _ ->
+              let expected_args =
+                ((UnsizedType.AutoDiffable, func_type) :: mandatory_arg_tys)
+                @ variadic_arg_tys in
+              check_compatible_arguments 0 expected_args args
+              |> Result.map ~f:(fun x -> (func_type, x))
+              |> Result.map_error ~f:(fun x -> (expected_args, x)) )
+      else wrap_func_error (SuffixMismatch (FnPlain, suffix))
+  | (_, x) :: _ -> TypeMismatch (minimal_func_type, x, None) |> wrap_err
+  | [] -> Error ([], ArgNumMismatch (List.length mandatory_arg_tys, 0))
+
+
+  let check_laplace_variadic_args name mandatory_arg_tys mandatory_fun_arg_tys fun_return args =
+  let minimal_func_type =
+    UnsizedType.UFun (mandatory_fun_arg_tys, ReturnType fun_return, FnPlain, AoS)
+  in
+  let minimal_args =
+    (UnsizedType.AutoDiffable, minimal_func_type) :: mandatory_arg_tys in
+  let wrap_err x = Error (minimal_args, ArgError (1, x)) in
+  match args with
+  | ( _
+    , ( UnsizedType.UFun (fun_args, ReturnType return_type, suffix, _) as
+      func_type ) )
+    :: _ ->
+      let mandatory, variadic_arg_tys =
+        List.split_n fun_args (List.length mandatory_fun_arg_tys) in
+      let wrap_func_error x =
+        TypeMismatch (minimal_func_type, func_type, Some x) |> wrap_err in
+      let suffix = Fun_kind.without_propto suffix in
+      if suffix = FnPlain then
         match check_compatible_arguments 1 mandatory mandatory_fun_arg_tys with
         | Error x -> wrap_func_error (InputMismatch x)
         | Ok _ -> (
