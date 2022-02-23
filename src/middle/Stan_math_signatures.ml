@@ -160,15 +160,10 @@ let variadic_dae_fun_return_type = UnsizedType.UVector
 let variadic_dae_return_type = UnsizedType.UArray UnsizedType.UVector
 
 let variadic_laplace_tol_arg_types =
-  [ (UnsizedType.DataOnly, UnsizedType.UReal); (DataOnly, UInt)
-  ; (DataOnly, UInt); (DataOnly, UInt); (DataOnly, UInt) ]
+  [ (UnsizedType.DataOnly, UnsizedType.UReal); (DataOnly, UInt); (DataOnly, UInt)
+  ; (DataOnly, UInt); (DataOnly, UInt) ]
 
-let variadic_laplace_mandatory_arg_types =
-  [(UnsizedType.AutoDiffable, UnsizedType.UVector) ] (* theta_0 *)
-
-let variadic_laplace_mandatory_fun_args =
-  []
-
+let variadic_laplace_mandatory_fun_args = []
 let variadic_laplace_fun_return_type = UnsizedType.UMatrix
 let variadic_laplace_return_type = UnsizedType.UReal
 
@@ -243,27 +238,38 @@ let is_variadic_dae_fn f = Set.mem variadic_dae_fns f
 let is_variadic_dae_tol_fn f =
   is_variadic_dae_fn f && String.is_suffix f ~suffix:dae_tolerances_suffix
 
+let is_variadic_laplace_fn_defs =
+  String.Set.of_list
+    [ "laplace_marginal_neg_binomial_2_log_lpmf"
+    ; "laplace_marginal_bernoulli_logit_lpmf"
+    ; "laplace_marginal_poisson_log_lpmf" ]
 
-let is_variadic_laplace_fn_defs = String.Set.of_list 
- ["laplace_marginal_neg_binomial_2_log_lpmf" 
-  ; "laplace_marginal_bernoulli_logit_lpmf"
-  ; "laplace_marginal_poisson_log_lpmf"]
+let laplace_mandatory_args_map =
+  Map.of_alist_exn
+    (module String)
+    [ ( "neg_binomial_2_log"
+      , [ (UnsizedType.AutoDiffable, UnsizedType.UArray UInt)
+        ; (AutoDiffable, UArray UInt) ] )
+    ; ( "bernoulli_logit"
+      , [(AutoDiffable, UArray UInt); (AutoDiffable, UArray UInt)] )
+    ; ("poisson_log", [(AutoDiffable, UArray UInt); (AutoDiffable, UArray UInt)]) ]
 
-let laplace_mandatory_args_map = Map.of_alist_exn (module String)
- [("neg_binomial_2_log", 
- [(UnsizedType.DataOnly, UnsizedType.UArray UInt); (DataOnly, UArray UInt)])
-  ; ("bernoulli_logit",
-   [(DataOnly, UArray UInt); (DataOnly, UArray UInt)])
-  ; ("poisson_log",
-   [(DataOnly, UArray UInt); (DataOnly, UArray UInt)])] 
+let variadic_laplace_mandatory_arg_types name =
+  let contains_substring search =
+    String.substr_index ~pattern:search name <> None in
+  let sub_map =
+    Map.filter_keys laplace_mandatory_args_map ~f:contains_substring in
+  let blah = Map.find sub_map (List.hd_exn (Map.keys sub_map)) in
+  match blah with Some x -> x | None -> []
+
 let is_variadic_laplace_fn x = Set.mem is_variadic_laplace_fn_defs x
 
+let is_variadic_laplace_tol_fn x =
+  String.is_prefix ~prefix:"laplace_marginal" x
+  && ( String.is_suffix ~suffix:"_tol_lpmf" x
+     || String.is_suffix ~suffix:"_tol_lpdf" x )
 
-let is_variadic_laplace_tol_fn x = 
-  String.is_prefix ~prefix:"laplace_marginal" x && (String.is_suffix ~suffix:"_tol_lpmf" x || String.is_suffix ~suffix:"_tol_lpdf" x)
-
-
-  let distributions =
+let distributions =
   [ ( full_lpmf
     , "beta_binomial"
     , [DVInt; DVInt; DVReal; DVReal]

@@ -33,11 +33,11 @@ module TypeError = struct
         * SignatureMismatch.function_mismatch
         * UnsizedType.t
     | IllTypedVariadicLaplace of
-      string
-      * UnsizedType.t list
-      * (UnsizedType.autodifftype * UnsizedType.t) list
-      * SignatureMismatch.function_mismatch
-      * UnsizedType.t
+        string
+        * UnsizedType.t list
+        * (UnsizedType.autodifftype * UnsizedType.t) list
+        * SignatureMismatch.function_mismatch
+        * UnsizedType.t
     | AmbiguousFunctionPromotion of
         string
         * UnsizedType.t list option
@@ -144,10 +144,10 @@ module TypeError = struct
           , arg_tys
           , ([((UnsizedType.ReturnType return_type, args), error)], false) )
     | IllTypedVariadicLaplace (name, arg_tys, args, error, return_type) ->
-      SignatureMismatch.pp_signature_mismatch ppf
-        ( name
-        , arg_tys
-        , ([((UnsizedType.ReturnType return_type, args), error)], false) )    
+        SignatureMismatch.pp_signature_mismatch ppf
+          ( name
+          , arg_tys
+          , ([((UnsizedType.ReturnType return_type, args), error)], false) )
     | AmbiguousFunctionPromotion (name, arg_tys, signatures) ->
         let pp_sig ppf (rt, args) =
           Fmt.pf ppf "@[<hov>(@[<hov>%a@]) => %a@]"
@@ -586,7 +586,7 @@ let illtyped_variadic_laplace loc name arg_tys args error =
         , args
         , error
         , Stan_math_signatures.variadic_laplace_fun_return_type ) )
-        
+
 let ambiguous_function_promotion loc name arg_tys signatures =
   TypeError
     (loc, TypeError.AmbiguousFunctionPromotion (name, arg_tys, signatures))

@@ -269,43 +269,42 @@ let check_variadic_args allow_lpdf mandatory_arg_tys mandatory_fun_arg_tys
   | (_, x) :: _ -> TypeMismatch (minimal_func_type, x, None) |> wrap_err
   | [] -> Error ([], ArgNumMismatch (List.length mandatory_arg_tys, 0))
 
-
-  let check_laplace_variadic_args name mandatory_arg_tys mandatory_fun_arg_tys fun_return args =
+let check_laplace_variadic_args
+    (mandatory_lp_args : (UnsizedType.autodifftype * UnsizedType.t) list)
+    fun_return args =
   let minimal_func_type =
-    UnsizedType.UFun (mandatory_fun_arg_tys, ReturnType fun_return, FnPlain, AoS)
-  in
+    UnsizedType.UFun ([], ReturnType fun_return, FnPlain, AoS) in
   let minimal_args =
-    (UnsizedType.AutoDiffable, minimal_func_type) :: mandatory_arg_tys in
+    mandatory_lp_args @ [(UnsizedType.AutoDiffable, minimal_func_type)] in
   let wrap_err x = Error (minimal_args, ArgError (1, x)) in
   match args with
   | ( _
     , ( UnsizedType.UFun (fun_args, ReturnType return_type, suffix, _) as
       func_type ) )
     :: _ ->
-      let mandatory, variadic_arg_tys =
-        List.split_n fun_args (List.length mandatory_fun_arg_tys) in
+      (* this is not right*)
+      let functor_variadic_arg_types = fun_args in
       let wrap_func_error x =
         TypeMismatch (minimal_func_type, func_type, Some x) |> wrap_err in
       let suffix = Fun_kind.without_propto suffix in
       if suffix = FnPlain then
-        match check_compatible_arguments 1 mandatory mandatory_fun_arg_tys with
-        | Error x -> wrap_func_error (InputMismatch x)
-        | Ok _ -> (
-          match check_same_type 1 return_type fun_return with
-          | Error _ ->
-              wrap_func_error
-                (ReturnTypeMismatch
-                   (ReturnType fun_return, ReturnType return_type) )
-          | Ok _ ->
-              let expected_args =
-                ((UnsizedType.AutoDiffable, func_type) :: mandatory_arg_tys)
-                @ variadic_arg_tys in
-              check_compatible_arguments 0 expected_args args
-              |> Result.map ~f:(fun x -> (func_type, x))
-              |> Result.map_error ~f:(fun x -> (expected_args, x)) )
+        match check_same_type 1 return_type fun_return with
+        | Error _ ->
+            let () = printf "Got blah2" in
+            wrap_func_error
+              (ReturnTypeMismatch (ReturnType fun_return, ReturnType return_type)
+              )
+        | Ok _ ->
+          let expected_args =
+            (mandatory_lp_args )
+            @ functor_variadic_arg_types in
+            let () = printf "Got blah1" in
+            check_compatible_arguments 0 expected_args args
+            |> Result.map ~f:(fun x -> (func_type, x))
+            |> Result.map_error ~f:(fun x -> (expected_args, x))
       else wrap_func_error (SuffixMismatch (FnPlain, suffix))
   | (_, x) :: _ -> TypeMismatch (minimal_func_type, x, None) |> wrap_err
-  | [] -> Error ([], ArgNumMismatch (List.length mandatory_arg_tys, 0))
+  | [] -> Error ([], ArgNumMismatch (List.length mandatory_lp_args, 0))
 
 let pp_signature_mismatch ppf (name, arg_tys, (sigs, omitted)) =
   let open Fmt in
