@@ -561,7 +561,7 @@ let rec check_fn ~is_cond_dist loc cf tenv id (tes : Ast.typed_expression list)
   else if Stan_math_signatures.is_variadic_dae_fn id.name then
     check_variadic_dae ~is_cond_dist loc cf tenv id tes
   else if Stan_math_signatures.is_variadic_laplace_fn id.name then
-    check_variadic_laplace2 ~is_cond_dist loc cf tenv id tes
+    check_variadic_laplace ~is_cond_dist loc cf tenv id tes
   else check_normal_fn ~is_cond_dist loc tenv id tes
 
 and check_reduce_sum ~is_cond_dist loc cf tenv id tes =
@@ -714,151 +714,92 @@ and check_variadic_dae ~is_cond_dist loc cf tenv id tes =
         |> error )
   | _ -> fail ()
 
-(*
-and peeler n lister =
-  let rec peeler_impl n (left_list : 'a list) (right_list : 'a list) =
-    if n = 0 then (left_list, right_list)
-    else
-      peeler_impl (n - 1)
-        (List.hd_exn right_list :: left_list)
-        (List.tl_exn right_list) in
-  peeler_impl n [] lister 
-*)
 (**
- * Validate and create MIR for variadic laplace approximation.
- * We check that 
+ * Validate variadic laplace approximation.
+ * We check that
  * 1. The mandatory args for the lpdf/lpmf functions and are correct
  * 2. The argument order is [mandatory_lpdf_args, inits, covariance_func, covaraince_func_args...]
  * 3. The covaraince_func_args match for the covariance_func
  *)
-and check_variadic_laplace2 ~is_cond_dist (loc : Location_span.t)
+and check_variadic_laplace ~is_cond_dist (loc : Location_span.t)
     (cf : context_flags_record) (tenv : Env.t) (id : identifier)
-    (tes : (typed_expr_meta, fun_kind) expr_with list) =
-  let optional_tol_args :
-      (UnsizedType.autodifftype * UnsizedType.t) list =
+    (tes : typed_expression list) =
+  (* argument splitting *)
+  let dist_vector_args, fn_variadic_args =
+    List.split_while
+      ~f:(fun {emeta= {type_; _}; _} -> not (UnsizedType.is_fun_type type_))
+      tes in
+  let init_vector =
+    match List.last dist_vector_args with
+    | Some v -> v
+    | None -> Semantic_error.variadic_laplace_missing_args loc |> error in
+  let dist_args = List.drop_last_exn dist_vector_args in
+  (* begin typechecking *)
+  (* 1. check that the pdf/pmf this is calling is valid *)
+  let internal_name =
+    id.name
+    |> String.chop_prefix_exn ~prefix:"laplace_marginal_"
+    |> String.substr_replace_all ~pattern:"_tol" ~with_:"" in
+  ignore (* ignore the result - we only want this to raise an error *)
+    (* except for the possibility of promotions? *)
+    ( check_normal_fn ~is_cond_dist:false loc tenv
+        {id with name= internal_name}
+        dist_args
+      : typed_expression ) ;
+  (* 2. check that the init vector is valid *)
+  if init_vector.emeta.type_ <> UVector then
+    Semantic_error.vector_expected init_vector.emeta.loc
+      "Laplace initialization" init_vector.emeta.type_
+    |> error ;
+  (* 3. check variadic function, similar to ODE/DAE/reduce_sum *)
+  let optional_tol_args : (UnsizedType.autodifftype * UnsizedType.t) list =
     if Stan_math_signatures.is_variadic_laplace_tol_fn id.name then
       Stan_math_signatures.variadic_laplace_tol_arg_types
     else [] in
   let mandatory_lp_arg_types : (UnsizedType.autodifftype * UnsizedType.t) list =
-    Stan_math_signatures.variadic_laplace_mandatory_arg_types id.name @
-     [(UnsizedType.AutoDiffable, UnsizedType.UVector)] @ 
-     optional_tol_args in
-  (*TODO: Need to split on covar fun and check lhs and rhs of it*)
-  match tes with
-  | a :: b :: {emeta= theta0_meta; _} :: {expr= Variable covar_fun; emeta= covar_meta}
-   :: tail_exprs2
-    when UnsizedType.is_fun_type covar_meta.type_
-         && UnsizedType.is_eigen_type theta0_meta.type_ -> (
-      let tail_exprs = a :: b :: tail_exprs2 in
-      let () = printf "I happened2\n" in
-      let matching remaining_exprs Env.{type_= ftype; _} =
-        let arg_types =
-          (calculate_autodifftype cf Functions ftype, ftype)
-          :: get_arg_types remaining_exprs in
-        SignatureMismatch.check_laplace_variadic_args mandatory_lp_arg_types
-          Stan_math_signatures.variadic_laplace_fun_return_type arg_types in
-     match find_matching_first_order_fn tenv (matching tail_exprs) covar_fun
-      with
-      | SignatureMismatch.UniqueMatch (ftype, promotions) ->
-          let () = printf "I happened3\n" in
-          let tes2 =
-            make_function_variable cf loc covar_fun ftype :: tail_exprs in
-          mk_typed_expression
-            ~expr:
-              (mk_fun_app ~is_cond_dist
-                 (StanLib FnPlain, id, Promotion.promote_list tes2 promotions) )
-            ~ad_level:(expr_ad_lub tes)
-            ~type_:UnsizedType.UReal ~loc
-      | AmbiguousMatch ps ->
-          let () = printf "I happened4\n" in
-          Semantic_error.ambiguous_function_promotion loc covar_fun.name None ps
-          |> error
-      | SignatureErrors (expected_args, err) ->
-          let () = printf "I happened5\n" in
-          Semantic_error.illtyped_variadic_laplace loc id.name
-            (List.map ~f:type_of_expr_typed tes)
-            expected_args err
-          |> error )
-  | _ ->
-      let () = printf "I happened1\n" in
-      let expected_args, err =
-        SignatureMismatch.check_laplace_variadic_args mandatory_lp_arg_types
-          Stan_math_signatures.variadic_laplace_fun_return_type
-          (get_arg_types tes)
-        |> Result.error |> Option.value_exn in
-      Semantic_error.illtyped_variadic_laplace loc id.name
-        (List.map ~f:type_of_expr_typed tes)
-        expected_args err
-      |> error
-(*
-and check_variadic_laplace ~is_cond_dist (loc : Location_span.t)
-    (cf : context_flags_record) (tenv : Env.t) (id : identifier)
-    (tes : (typed_expr_meta, fun_kind) expr_with list) =
-  let optional_tol_mandatory_args :
-      (UnsizedType.autodifftype * UnsizedType.t) list =
-    if Stan_math_signatures.is_variadic_laplace_tol_fn id.name then
-      Stan_math_signatures.variadic_laplace_tol_arg_types
-    else [] in
-  let mandatory_arg_types : (UnsizedType.autodifftype * UnsizedType.t) list =
-    Stan_math_signatures.variadic_laplace_mandatory_arg_types id.name
-    @ optional_tol_mandatory_args in
-  let fail () =
-    let () = printf "I happened1\n" in
-    let expected_args, err =
-      SignatureMismatch.check_laplace_variadic_args mandatory_arg_types
-        Stan_math_signatures.variadic_laplace_fun_return_type
-        (get_arg_types tes)
-      |> Result.error |> Option.value_exn in
-    Semantic_error.illtyped_variadic_laplace loc id.name
-      (List.map ~f:type_of_expr_typed tes)
-      expected_args err
-    |> error in
+    Stan_math_signatures.variadic_laplace_mandatory_arg_types
+    @ optional_tol_args in
   let matching remaining_exprs Env.{type_= ftype; _} =
     let arg_types =
       (calculate_autodifftype cf Functions ftype, ftype)
       :: get_arg_types remaining_exprs in
-    SignatureMismatch.check_laplace_variadic_args []
+    SignatureMismatch.check_variadic_args false mandatory_lp_arg_types
+      Stan_math_signatures.variadic_laplace_mandatory_fun_args
       Stan_math_signatures.variadic_laplace_fun_return_type arg_types in
-  let peeler n lister =
-    let rec peeler_impl n (left_list : 'a list) (right_list : 'a list) =
-      if n = 0 then (left_list, right_list)
-      else
-        peeler_impl (n - 1)
-          (List.hd_exn right_list :: left_list)
-          (List.tl_exn right_list) in
-    peeler_impl n [] lister in
-  let _, min_tess = peeler 2 tes in
-  match min_tess with
-  | {expr= Variable covar_fun; emeta= covar_meta}
-    :: {emeta= theta0_meta; _} :: tail_exprs
-    when UnsizedType.is_fun_type covar_meta.type_
-         && UnsizedType.is_eigen_type theta0_meta.type_ -> (
-      let () = printf "I happened2\n" in
-      match
-        find_matching_first_order_fn tenv (matching tail_exprs) covar_fun
-      with
-      | SignatureMismatch.UniqueMatch (ftype, promotions) ->
-          let () = printf "I happened3\n" in
-          let tes2 =
-            make_function_variable cf loc covar_fun ftype :: tail_exprs in
-          mk_typed_expression
-            ~expr:
-              (mk_fun_app ~is_cond_dist
-                 (StanLib FnPlain, id, Promotion.promote_list tes2 promotions) )
-            ~ad_level:(expr_ad_lub tes)
-            ~type_:Stan_math_signatures.variadic_laplace_return_type ~loc
-      | AmbiguousMatch ps ->
-          let () = printf "I happened4\n" in
-          Semantic_error.ambiguous_function_promotion loc covar_fun.name None ps
-          |> error
-      | SignatureErrors (expected_args, err) ->
-          let () = printf "I happened5\n" in
-          Semantic_error.illtyped_variadic_laplace loc id.name
-            (List.map ~f:type_of_expr_typed tes)
-            expected_args err
-          |> error )
-  | _ -> fail ()
-*)
+  match fn_variadic_args with
+  | {expr= Variable fname; _} :: remaining_es -> (
+    match find_matching_first_order_fn tenv (matching remaining_es) fname with
+    | SignatureMismatch.UniqueMatch (ftype, promotions) ->
+        let tes2 = make_function_variable cf loc fname ftype :: remaining_es in
+        mk_typed_expression
+          ~expr:
+            (mk_fun_app ~is_cond_dist
+               ( StanLib FnPlain
+               , id
+               , dist_vector_args @ Promotion.promote_list tes2 promotions ) )
+          ~ad_level:(expr_ad_lub tes) ~type_:UnsizedType.UReal ~loc
+    | AmbiguousMatch ps ->
+        Semantic_error.ambiguous_function_promotion loc fname.name None ps
+        |> error
+    | SignatureErrors (expected_args, err) ->
+        Semantic_error.illtyped_variadic_laplace loc id.name
+          (List.map ~f:type_of_expr_typed tes)
+          (List.map ~f:arg_type dist_vector_args @ expected_args)
+          err
+        |> error )
+  | _ ->
+      let expected_args, err =
+        SignatureMismatch.check_variadic_args false mandatory_lp_arg_types
+          Stan_math_signatures.variadic_laplace_mandatory_fun_args
+          Stan_math_signatures.variadic_laplace_fun_return_type
+          (get_arg_types fn_variadic_args)
+        |> Result.error |> Option.value_exn in
+      Semantic_error.illtyped_variadic_laplace loc id.name
+        (List.map ~f:type_of_expr_typed tes)
+        (List.map ~f:arg_type dist_vector_args @ expected_args)
+        err
+      |> error
+
 and check_funapp loc cf tenv ~is_cond_dist id (es : Ast.typed_expression list) =
   let name_check =
     if is_cond_dist then verify_conddist_name else verify_fn_conditioning in
@@ -1227,6 +1168,7 @@ let verify_valid_sampling_pos loc cf =
   else Semantic_error.target_plusequals_outisde_model_or_logprob loc |> error
 
 let verify_sampling_distribution loc tenv id arguments =
+  (* NB: Laplace is special cased and does not call this *)
   let name = id.name in
   let argumenttypes = List.map ~f:arg_type arguments in
   let name_w_suffix_sampling_dist suffix =
@@ -1304,7 +1246,13 @@ let check_tilde loc cf tenv distribution truncation arg args =
   verify_sampling_pdf_pmf distribution ;
   verify_valid_sampling_pos loc cf ;
   verify_sampling_cdf_ccdf loc distribution ;
-  verify_sampling_distribution loc tenv distribution (te :: tes) ;
+  if Stan_math_signatures.is_variadic_laplace_fn distribution.name then
+    ignore
+      ( check_variadic_laplace ~is_cond_dist:false loc cf tenv
+          {distribution with name= distribution.name ^ "_lpmf"}
+          (te :: tes)
+        : typed_expression )
+  else verify_sampling_distribution loc tenv distribution (te :: tes) ;
   verify_sampling_cdf_defined loc tenv distribution ttrunc tes ;
   verify_can_truncate_distribution loc te ttrunc ;
   let stmt = Tilde {arg= te; distribution; args= tes; truncation= ttrunc} in

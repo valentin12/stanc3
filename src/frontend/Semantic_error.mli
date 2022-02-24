@@ -17,6 +17,7 @@ val int_expected : Location_span.t -> string -> UnsizedType.t -> t
 val int_or_real_expected : Location_span.t -> string -> UnsizedType.t -> t
 val int_intarray_or_range_expected : Location_span.t -> UnsizedType.t -> t
 val int_or_real_container_expected : Location_span.t -> UnsizedType.t -> t
+val vector_expected : Location_span.t -> string -> UnsizedType.t -> t
 
 val scalar_or_type_expected :
   Location_span.t -> string -> UnsizedType.t -> UnsizedType.t -> t
@@ -90,6 +91,7 @@ val illtyped_variadic_laplace :
   -> SignatureMismatch.function_mismatch
   -> t
 
+val variadic_laplace_missing_args : Location_span.t -> t
 val nonreturning_fn_expected_returning_found : Location_span.t -> string -> t
 val nonreturning_fn_expected_nonfn_found : Location_span.t -> string -> t
 
