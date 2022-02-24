@@ -75,18 +75,6 @@ val check_variadic_args :
       If none is found, returns [Error] of the list of args and a function_mismatch.
      *)
 
-val check_laplace_variadic_args :
-     (UnsizedType.autodifftype * UnsizedType.t) list
-  -> UnsizedType.t
-  -> (UnsizedType.autodifftype * UnsizedType.t) list
-  -> ( UnsizedType.t * Promotion.t list
-     , (UnsizedType.autodifftype * UnsizedType.t) list * function_mismatch )
-     result
-(** Check variadic function arguments.
-    If a match is found, returns [Ok] of the function type and a list of promotions (see [promote])
-    If none is found, returns [Error] of the list of args and a function_mismatch.
-   *)
-
 val pp_signature_mismatch :
      Format.formatter
   -> string

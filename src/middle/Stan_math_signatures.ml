@@ -244,24 +244,9 @@ let is_variadic_laplace_fn_defs =
     ; "laplace_marginal_bernoulli_logit_lpmf"
     ; "laplace_marginal_poisson_log_lpmf" ]
 
-let laplace_mandatory_args_map =
-  Map.of_alist_exn
-    (module String)
-    [ ( "neg_binomial_2_log"
-      , [ (UnsizedType.AutoDiffable, UnsizedType.UArray UInt)
-        ; (AutoDiffable, UArray UInt) ] )
-    ; ( "bernoulli_logit"
-      , [(AutoDiffable, UArray UInt); (AutoDiffable, UArray UInt)] )
-    ; ("poisson_log", [(AutoDiffable, UArray UInt); (AutoDiffable, UArray UInt)]) ]
+let variadic_laplace_mandatory_arg_types = []
 
-let variadic_laplace_mandatory_arg_types name =
-  let contains_substring search =
-    String.substr_index ~pattern:search name <> None in
-  let sub_map =
-    Map.filter_keys laplace_mandatory_args_map ~f:contains_substring in
-  let blah = Map.find sub_map (List.hd_exn (Map.keys sub_map)) in
-  match blah with Some x -> x | None -> []
-
+(* TODO does this catch tolerances as well?*)
 let is_variadic_laplace_fn x = Set.mem is_variadic_laplace_fn_defs x
 
 let is_variadic_laplace_tol_fn x =
