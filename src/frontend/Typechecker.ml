@@ -776,8 +776,7 @@ and check_variadic_laplace ~is_cond_dist (loc : Location_span.t)
             (mk_fun_app ~is_cond_dist
                ( StanLib FnPlain
                , id
-               , dist_args
-                 @ (init_vector :: Promotion.promote_list tes2 promotions) ) )
+               , dist_vector_args @ Promotion.promote_list tes2 promotions ) )
           ~ad_level:(expr_ad_lub tes) ~type_:UnsizedType.UReal ~loc
     | AmbiguousMatch ps ->
         Semantic_error.ambiguous_function_promotion loc fname.name None ps
@@ -785,18 +784,20 @@ and check_variadic_laplace ~is_cond_dist (loc : Location_span.t)
     | SignatureErrors (expected_args, err) ->
         Semantic_error.illtyped_variadic_laplace loc id.name
           (List.map ~f:type_of_expr_typed tes)
-          expected_args err
+          (List.map ~f:arg_type dist_vector_args @ expected_args)
+          err
         |> error )
   | _ ->
       let expected_args, err =
         SignatureMismatch.check_variadic_args false mandatory_lp_arg_types
           Stan_math_signatures.variadic_laplace_mandatory_fun_args
           Stan_math_signatures.variadic_laplace_fun_return_type
-          (get_arg_types tes)
+          (get_arg_types fn_variadic_args)
         |> Result.error |> Option.value_exn in
       Semantic_error.illtyped_variadic_laplace loc id.name
         (List.map ~f:type_of_expr_typed tes)
-        expected_args err
+        (List.map ~f:arg_type dist_vector_args @ expected_args)
+        err
       |> error
 
 and check_funapp loc cf tenv ~is_cond_dist id (es : Ast.typed_expression list) =
