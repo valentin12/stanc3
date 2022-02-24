@@ -740,7 +740,6 @@ and check_variadic_laplace ~is_cond_dist (loc : Location_span.t)
     List.split_while
       ~f:(fun {emeta= {type_; _}; _} -> not (UnsizedType.is_fun_type type_))
       tes in
-  print_s [%sexp (dist_vector_args : typed_expression list)] ;
   let init_vector =
     match List.last dist_vector_args with
     | Some v -> v
@@ -782,7 +781,6 @@ and check_variadic_laplace ~is_cond_dist (loc : Location_span.t)
   | {expr= Variable fname; _} :: remaining_es -> (
     match find_matching_first_order_fn tenv (matching remaining_es) fname with
     | SignatureMismatch.UniqueMatch (ftype, promotions) ->
-        let () = printf "I happened3\n" in
         let tes2 = make_function_variable cf loc fname ftype :: remaining_es in
         mk_typed_expression
           ~expr:
@@ -793,17 +791,14 @@ and check_variadic_laplace ~is_cond_dist (loc : Location_span.t)
                  @ (init_vector :: Promotion.promote_list tes2 promotions) ) )
           ~ad_level:(expr_ad_lub tes) ~type_:UnsizedType.UReal ~loc
     | AmbiguousMatch ps ->
-        let () = printf "I happened4\n" in
         Semantic_error.ambiguous_function_promotion loc fname.name None ps
         |> error
     | SignatureErrors (expected_args, err) ->
-        let () = printf "I happened5\n" in
         Semantic_error.illtyped_variadic_laplace loc id.name
           (List.map ~f:type_of_expr_typed tes)
           expected_args err
         |> error )
   | _ ->
-      let () = printf "I happened1\n" in
       let expected_args, err =
         SignatureMismatch.check_variadic_args false mandatory_lp_arg_types
           Stan_math_signatures.variadic_laplace_mandatory_fun_args
