@@ -714,17 +714,6 @@ and check_variadic_dae ~is_cond_dist loc cf tenv id tes =
         |> error )
   | _ -> fail ()
 
-(*
-and peeler n lister =
-  let rec peeler_impl n (left_list : 'a list) (right_list : 'a list) =
-    if n = 0 then (left_list, right_list)
-    else
-      peeler_impl (n - 1)
-        (List.hd_exn right_list :: left_list)
-        (List.tl_exn right_list) in
-  peeler_impl n [] lister
-*)
-
 (**
  * Validate variadic laplace approximation.
  * We check that
@@ -1178,8 +1167,7 @@ let verify_valid_sampling_pos loc cf =
   else Semantic_error.target_plusequals_outisde_model_or_logprob loc |> error
 
 let verify_sampling_distribution loc tenv id arguments =
-  (* TODO: For Laplace, I honestly think the best thing may be to just intercept the
-     known names and special case here, rather than edit the following code *)
+  (* NB: Laplace is special cased and does not call this *)
   let name = id.name in
   let argumenttypes = List.map ~f:arg_type arguments in
   let name_w_suffix_sampling_dist suffix =
@@ -1257,7 +1245,13 @@ let check_tilde loc cf tenv distribution truncation arg args =
   verify_sampling_pdf_pmf distribution ;
   verify_valid_sampling_pos loc cf ;
   verify_sampling_cdf_ccdf loc distribution ;
-  verify_sampling_distribution loc tenv distribution (te :: tes) ;
+  if Stan_math_signatures.is_variadic_laplace_fn distribution.name then
+    ignore
+      ( check_variadic_laplace ~is_cond_dist:false loc cf tenv
+          {distribution with name= distribution.name ^ "_lpmf"}
+          (te :: tes)
+        : typed_expression )
+  else verify_sampling_distribution loc tenv distribution (te :: tes) ;
   verify_sampling_cdf_defined loc tenv distribution ttrunc tes ;
   verify_can_truncate_distribution loc te ttrunc ;
   let stmt = Tilde {arg= te; distribution; args= tes; truncation= ttrunc} in

@@ -18,5 +18,6 @@ parameters {
 model {
   target +=
     laplace_marginal_poisson_log_lpmf(y | n_samples, theta0, covar_fun, alpha);
+  y ~ laplace_marginal_poisson_log(n_samples, theta0, covar_fun, alpha);
 }
 

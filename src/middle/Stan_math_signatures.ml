@@ -238,18 +238,10 @@ let is_variadic_dae_fn f = Set.mem variadic_dae_fns f
 let is_variadic_dae_tol_fn f =
   is_variadic_dae_fn f && String.is_suffix f ~suffix:dae_tolerances_suffix
 
-let is_variadic_laplace_fn_defs =
-  String.Set.of_list
-    [ "laplace_marginal_neg_binomial_2_log_lpmf"
-    ; "laplace_marginal_bernoulli_logit_lpmf"
-    ; "laplace_marginal_poisson_log_lpmf" ]
-
 let variadic_laplace_mandatory_arg_types = []
 
-(* TODO does this catch tolerances as well?
-   What about rngs?
-*)
-let is_variadic_laplace_fn x = Set.mem is_variadic_laplace_fn_defs x
+(* TODO What about rngs? *)
+let is_variadic_laplace_fn x = String.is_prefix ~prefix:"laplace_marginal" x
 
 let is_variadic_laplace_tol_fn x =
   String.is_prefix ~prefix:"laplace_marginal" x
