@@ -246,7 +246,9 @@ let is_variadic_laplace_fn_defs =
 
 let variadic_laplace_mandatory_arg_types = []
 
-(* TODO does this catch tolerances as well?*)
+(* TODO does this catch tolerances as well?
+   What about rngs?
+*)
 let is_variadic_laplace_fn x = Set.mem is_variadic_laplace_fn_defs x
 
 let is_variadic_laplace_tol_fn x =
@@ -2097,6 +2099,8 @@ let () =
   add_unqualified ("zeros_array", ReturnType (UArray UReal), [UInt], SoA) ;
   add_unqualified ("zeros_row_vector", ReturnType URowVector, [UInt], SoA) ;
   add_unqualified ("zeros_vector", ReturnType UVector, [UInt], SoA) ;
+  (* BMW: This seems weird to me, we don't add other special-cased varadic functions to the table
+  *)
   (* Embedded Laplace approximation *)
   add_qualified
     (* function signature with x as an array of vectors *)

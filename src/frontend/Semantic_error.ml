@@ -10,6 +10,7 @@ module TypeError = struct
     | InvalidMatrixTypes of UnsizedType.t
     | IntExpected of string * UnsizedType.t
     | IntOrRealExpected of string * UnsizedType.t
+    | VectorExpected of string * UnsizedType.t
     | TypeExpected of string * UnsizedType.t * UnsizedType.t
     | IntIntArrayOrRangeExpected of UnsizedType.t
     | IntOrRealContainerExpected of UnsizedType.t
@@ -32,12 +33,7 @@ module TypeError = struct
         * (UnsizedType.autodifftype * UnsizedType.t) list
         * SignatureMismatch.function_mismatch
         * UnsizedType.t
-    | IllTypedVariadicLaplace of
-        string
-        * UnsizedType.t list
-        * (UnsizedType.autodifftype * UnsizedType.t) list
-        * SignatureMismatch.function_mismatch
-        * UnsizedType.t
+    | LaplaceMissingArguments
     | AmbiguousFunctionPromotion of
         string
         * UnsizedType.t list option
@@ -86,6 +82,9 @@ module TypeError = struct
           UnsizedType.pp ut
     | IntOrRealExpected (name, ut) ->
         Fmt.pf ppf "%s must be of type int or real. Instead found type %a." name
+          UnsizedType.pp ut
+    | VectorExpected (name, ut) ->
+        Fmt.pf ppf "%s must be of type vector. Instead found type %a." name
           UnsizedType.pp ut
     | TypeExpected (name, (UInt | UReal | UComplex), ut) ->
         Fmt.pf ppf "%s must be a scalar. Instead found type %a." name
@@ -142,11 +141,10 @@ module TypeError = struct
           ( name
           , arg_tys
           , ([((UnsizedType.ReturnType return_type, args), error)], false) )
-    | IllTypedVariadicLaplace (name, arg_tys, args, error, return_type) ->
-        SignatureMismatch.pp_signature_mismatch ppf
-          ( name
-          , arg_tys
-          , ([((UnsizedType.ReturnType return_type, args), error)], false) )
+    | LaplaceMissingArguments ->
+        Fmt.pf ppf
+          "Laplace approximation requires distribution arguments and \
+           initalization@ before function argument."
     | AmbiguousFunctionPromotion (name, arg_tys, signatures) ->
         let pp_sig ppf (rt, args) =
           Fmt.pf ppf "@[<hov>(@[<hov>%a@]) => %a@]"
@@ -527,6 +525,9 @@ let invalid_matrix_types loc ty =
 
 let int_expected loc name ut = TypeError (loc, TypeError.IntExpected (name, ut))
 
+let vector_expected loc name ut =
+  TypeError (loc, TypeError.VectorExpected (name, ut))
+
 let int_or_real_expected loc name ut =
   TypeError (loc, TypeError.IntOrRealExpected (name, ut))
 
@@ -583,12 +584,15 @@ let illtyped_variadic_dae loc name arg_tys args error =
 let illtyped_variadic_laplace loc name arg_tys args error =
   TypeError
     ( loc
-    , TypeError.IllTypedVariadicLaplace
+    , TypeError.IllTypedVariadicDE
         ( name
         , arg_tys
         , args
         , error
         , Stan_math_signatures.variadic_laplace_fun_return_type ) )
+
+let variadic_laplace_missing_args loc =
+  TypeError (loc, TypeError.LaplaceMissingArguments)
 
 let ambiguous_function_promotion loc name arg_tys signatures =
   TypeError

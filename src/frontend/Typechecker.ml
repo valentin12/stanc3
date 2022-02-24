@@ -742,24 +742,28 @@ and check_variadic_laplace ~is_cond_dist (loc : Location_span.t)
       tes in
   print_s [%sexp (dist_vector_args : typed_expression list)] ;
   let init_vector =
-    List.last dist_vector_args
-    |> Option.value_exn ~message:"Todo failed without lpdf args" in
+    match List.last dist_vector_args with
+    | Some v -> v
+    | None -> Semantic_error.variadic_laplace_missing_args loc |> error in
   let dist_args = List.drop_last_exn dist_vector_args in
   (* begin typechecking *)
   (* 1. check that the pdf/pmf this is calling is valid *)
+  let internal_name =
+    id.name
+    |> String.chop_prefix_exn ~prefix:"laplace_marginal_"
+    |> String.substr_replace_all ~pattern:"_tol" ~with_:"" in
   ignore (* ignore the result - we only want this to raise an error *)
     (* except for the possibility of promotions? *)
     ( check_normal_fn ~is_cond_dist:false loc tenv
-        {id with name= "poisson_log_lpmf"}
-        (*placeholder: turn into actual fn id, e.g. poisson_log_lpmf *)
+        {id with name= internal_name}
         dist_args
       : typed_expression ) ;
   (* 2. check that the init vector is valid *)
-  ignore (init_vector : typed_expression) ;
-  (* TODO similar to check_expression_of_int_type *)
+  if init_vector.emeta.type_ <> UVector then
+    Semantic_error.vector_expected init_vector.emeta.loc
+      "Laplace initialization" init_vector.emeta.type_
+    |> error ;
   (* 3. check variadic function, similar to ODE/DAE/reduce_sum *)
-
-  (* adapted from steve's prior work*)
   let optional_tol_args : (UnsizedType.autodifftype * UnsizedType.t) list =
     if Stan_math_signatures.is_variadic_laplace_tol_fn id.name then
       Stan_math_signatures.variadic_laplace_tol_arg_types
@@ -1179,6 +1183,8 @@ let verify_valid_sampling_pos loc cf =
   else Semantic_error.target_plusequals_outisde_model_or_logprob loc |> error
 
 let verify_sampling_distribution loc tenv id arguments =
+  (* TODO: For Laplace, I honestly think the best thing may be to just intercept the
+     known names and special case here, rather than edit the following code *)
   let name = id.name in
   let argumenttypes = List.map ~f:arg_type arguments in
   let name_w_suffix_sampling_dist suffix =
