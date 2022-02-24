@@ -748,8 +748,10 @@ and check_variadic_laplace2 ~is_cond_dist (loc : Location_span.t)
   (* begin typechecking *)
   (* 1. check that the pdf/pmf this is calling is valid *)
   ignore (* ignore the result - we only want this to raise an error *)
+    (* except for the possibility of promotions? *)
     ( check_normal_fn ~is_cond_dist:false loc tenv id
-        (*placeholder: turn into actual fn id *) dist_args
+        (*placeholder: turn into actual fn id, e.g. poisson_log_lpmf *)
+        dist_args
       : typed_expression ) ;
   (* 2. check that the init vector is valid *)
   (* TODO similar to check_expression_of_int_type *)
@@ -780,7 +782,10 @@ and check_variadic_laplace2 ~is_cond_dist (loc : Location_span.t)
         mk_typed_expression
           ~expr:
             (mk_fun_app ~is_cond_dist
-               (StanLib FnPlain, id, Promotion.promote_list tes2 promotions) )
+               ( StanLib FnPlain
+               , id
+               , dist_args
+                 @ (init_vector :: Promotion.promote_list tes2 promotions) ) )
           ~ad_level:(expr_ad_lub tes) ~type_:UnsizedType.UReal ~loc
     | AmbiguousMatch ps ->
         let () = printf "I happened4\n" in
