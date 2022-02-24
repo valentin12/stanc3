@@ -736,23 +736,15 @@ and check_variadic_laplace2 ~is_cond_dist (loc : Location_span.t)
     (cf : context_flags_record) (tenv : Env.t) (id : identifier)
     (tes : typed_expression list) =
   (* argument splitting *)
-  let is_fn_type = function
-    | Ast.{emeta= {type_= UMathLibraryFunction | UFun _; _}; _} -> true
-    | _ -> false in
   let dist_vector_args, fn_variadic_args =
-    List.split_while ~f:(Fn.non is_fn_type) tes in
+    List.split_while
+      ~f:(fun {emeta= {type_; _}; _} -> not (UnsizedType.is_fun_type type_))
+      tes in
   let init_vector =
     List.last dist_vector_args
     |> Option.value
          ~default:(failwith "Error 1 here: No lpdf/lmpf args supplied") in
   let dist_args = List.drop_last_exn dist_vector_args in
-  let fn =
-    List.hd fn_variadic_args
-    |> Option.value
-         ~default:
-           (failwith "Error 2 here: No function or variadic args supplied")
-  in
-  let variadic_args = List.tl_exn fn_variadic_args in
   (* begin typechecking *)
   (* 1. check that the pdf/pmf this is calling is valid *)
   ignore (* ignore the result - we only want this to raise an error *)
@@ -763,7 +755,7 @@ and check_variadic_laplace2 ~is_cond_dist (loc : Location_span.t)
   (* TODO similar to check_expression_of_int_type *)
   (* 3. check variadic function, similar to ODE/DAE/reduce_sum *)
 
-  (* steve's prior work*)
+  (* adapted from steve's prior work*)
   let optional_tol_args : (UnsizedType.autodifftype * UnsizedType.t) list =
     if Stan_math_signatures.is_variadic_laplace_tol_fn id.name then
       Stan_math_signatures.variadic_laplace_tol_arg_types
@@ -772,44 +764,34 @@ and check_variadic_laplace2 ~is_cond_dist (loc : Location_span.t)
     Stan_math_signatures.variadic_laplace_mandatory_arg_types id.name
     @ [(UnsizedType.AutoDiffable, UnsizedType.UVector)]
     @ optional_tol_args in
-  (*TODO: Need to split on covar fun and check lhs and rhs of it*)
-  match tes with
-  | a
-    :: b
-       :: {emeta= theta0_meta; _}
-          :: {expr= Variable covar_fun; emeta= covar_meta} :: tail_exprs2
-    when UnsizedType.is_fun_type covar_meta.type_
-         && UnsizedType.is_eigen_type theta0_meta.type_ -> (
-      let tail_exprs = a :: b :: tail_exprs2 in
-      let () = printf "I happened2\n" in
-      let matching remaining_exprs Env.{type_= ftype; _} =
-        let arg_types =
-          (calculate_autodifftype cf Functions ftype, ftype)
-          :: get_arg_types remaining_exprs in
-        SignatureMismatch.check_laplace_variadic_args mandatory_lp_arg_types
-          Stan_math_signatures.variadic_laplace_fun_return_type arg_types in
-      match
-        find_matching_first_order_fn tenv (matching tail_exprs) covar_fun
-      with
-      | SignatureMismatch.UniqueMatch (ftype, promotions) ->
-          let () = printf "I happened3\n" in
-          let tes2 =
-            make_function_variable cf loc covar_fun ftype :: tail_exprs in
-          mk_typed_expression
-            ~expr:
-              (mk_fun_app ~is_cond_dist
-                 (StanLib FnPlain, id, Promotion.promote_list tes2 promotions) )
-            ~ad_level:(expr_ad_lub tes) ~type_:UnsizedType.UReal ~loc
-      | AmbiguousMatch ps ->
-          let () = printf "I happened4\n" in
-          Semantic_error.ambiguous_function_promotion loc covar_fun.name None ps
-          |> error
-      | SignatureErrors (expected_args, err) ->
-          let () = printf "I happened5\n" in
-          Semantic_error.illtyped_variadic_laplace loc id.name
-            (List.map ~f:type_of_expr_typed tes)
-            expected_args err
-          |> error )
+  let matching remaining_exprs Env.{type_= ftype; _} =
+    let arg_types =
+      (calculate_autodifftype cf Functions ftype, ftype)
+      :: get_arg_types remaining_exprs in
+    (* Do we really need a new variadic args checker? why doesn't the prior one work? *)
+    SignatureMismatch.check_laplace_variadic_args mandatory_lp_arg_types
+      Stan_math_signatures.variadic_laplace_fun_return_type arg_types in
+  match fn_variadic_args with
+  | {expr= Variable fname; _} :: remaining_es -> (
+    match find_matching_first_order_fn tenv (matching remaining_es) fname with
+    | SignatureMismatch.UniqueMatch (ftype, promotions) ->
+        let () = printf "I happened3\n" in
+        let tes2 = make_function_variable cf loc fname ftype :: remaining_es in
+        mk_typed_expression
+          ~expr:
+            (mk_fun_app ~is_cond_dist
+               (StanLib FnPlain, id, Promotion.promote_list tes2 promotions) )
+          ~ad_level:(expr_ad_lub tes) ~type_:UnsizedType.UReal ~loc
+    | AmbiguousMatch ps ->
+        let () = printf "I happened4\n" in
+        Semantic_error.ambiguous_function_promotion loc fname.name None ps
+        |> error
+    | SignatureErrors (expected_args, err) ->
+        let () = printf "I happened5\n" in
+        Semantic_error.illtyped_variadic_laplace loc id.name
+          (List.map ~f:type_of_expr_typed tes)
+          expected_args err
+        |> error )
   | _ ->
       let () = printf "I happened1\n" in
       let expected_args, err =
