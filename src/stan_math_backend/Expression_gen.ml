@@ -479,6 +479,9 @@ and pp_compiler_internal_fn ad ut f ppf es =
                 "Array literal must have array type but found "
                   (ut : UnsizedType.t)] in
       pp_array_literal ut ppf es
+  | FnMakeTuple -> (
+    pf ppf "std::forward_as_tuple(%a)" (list ~sep:comma pp_expr) es
+  )
   | FnMakeRowVec -> (
     match ut with
     | UnsizedType.URowVector ->

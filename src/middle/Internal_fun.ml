@@ -6,6 +6,7 @@ type 'expr t =
   | FnLength
   | FnMakeArray
   | FnMakeRowVec
+  | FnMakeTuple
   | FnNegInf
   (* In AST_to_MIR being used as StanLib *)
   | FnReadData
@@ -56,7 +57,7 @@ let can_side_effect = function
    |FnReadWriteEventsOpenCL _ ->
       true
   | FnLength | FnMakeArray | FnMakeRowVec | FnNegInf | FnPrint | FnReject
-   |FnResizeToMatch | FnNaN | FnDeepCopy | FnCheck _ ->
+   |FnResizeToMatch | FnNaN | FnDeepCopy | FnCheck _ | FnMakeTuple ->
       false
 
 let collect_exprs fn = fold (fun accum e -> e :: accum) [] fn
