@@ -554,7 +554,7 @@ let make_function_variable cf loc id = function
 
 let check_make_tuple loc _ _ id tes = 
   mk_typed_expression
-  ~expr:(FunApp (Fun_kind.CompilerInternal Internal_fun.FnMakeTuple, id, tes))
+  ~expr:(FunApp (StanLib FnPlain, id, tes))
   ~ad_level:(expr_ad_lub tes) ~type_:UnsizedType.UMatrix ~loc
 
 let rec check_fn ~is_cond_dist loc cf tenv id (tes : Ast.typed_expression list)

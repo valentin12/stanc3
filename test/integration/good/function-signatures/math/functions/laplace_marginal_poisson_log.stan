@@ -34,6 +34,6 @@ model {
 }
 
 generated quantities {
-   vector[1] y_pred = laplace_marginal_poisson_log_rng(y, n_samples, theta0, 
+   vector[1] y_pred = laplace_marginal_poisson_log_rng(y, theta0, 
      covar_fun, make_tuple(x), make_tuple(x), alpha);
 }
