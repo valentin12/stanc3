@@ -418,20 +418,36 @@ and gen_functionals fname suffix es mem_pattern =
             Hashtbl.add_exn map_rect_calls ~key:next_map_rect_id ~data:f ;
             (strf "%s<%d, %s>" fname next_map_rect_id f, tl @ [msgs])
         | x, args when Stan_math_signatures.is_variadic_laplace_fn x ->
-          let dist_vector_args, fn_variadic_args =
-          List.split_while
-            ~f:(fun {meta= {type_; _}; _} -> not (UnsizedType.is_fun_type type_)) args in
-          let fn_variadic_args_plus_msg =
-            let add_ons = if  String.is_suffix fname ~suffix:"_rng" then 
-              [to_var "base_rng__"; msgs]
-          else 
-            [msgs]
-          in
-            match fn_variadic_args with 
-            | [f] -> f :: add_ons  
-            | f :: rest_of_args -> f ::  add_ons @ rest_of_args 
-            | _ -> fn_variadic_args 
-          in
+            let dist_vector_args, fn_variadic_args =
+              let blah1, blah2 =
+                List.split_while
+                  ~f:(fun {meta= {type_; _}; _} ->
+                    not (UnsizedType.is_fun_type type_) )
+                  args in
+              let not_basic =
+                x <> "laplace_marginal_tol_lpdf"
+                && x <> "laplace_marginal_tol_lpmf"
+                && x <> "laplace_marginal_lpdf"
+                && x <> "laplace_marginal_lpmf"
+                && x <> "laplace_marginal_tol_rng"
+                && x <> "laplace_marginal_rng" in
+              if not_basic then (blah1, blah2)
+              else
+                let blah3, blah4 =
+                  List.split_while
+                    ~f:(fun {meta= {type_; _}; _} ->
+                      not (UnsizedType.is_fun_type type_) )
+                    (List.tl_exn blah2) in
+                (blah1 @ [List.hd_exn blah2] @ blah3, blah4) in
+            let fn_variadic_args_plus_msg =
+              let add_ons =
+                if String.is_suffix fname ~suffix:"_rng" then
+                  [to_var "base_rng__"; msgs]
+                else [msgs] in
+              match fn_variadic_args with
+              | [f] -> f :: add_ons
+              | f :: rest_of_args -> (f :: add_ons) @ rest_of_args
+              | _ -> fn_variadic_args in
             (fname, dist_vector_args @ fn_variadic_args_plus_msg)
         | _, args -> (fname, args @ [msgs]) in
       let fname =
@@ -495,9 +511,8 @@ and pp_compiler_internal_fn ad ut f ppf es =
                 "Array literal must have array type but found "
                   (ut : UnsizedType.t)] in
       pp_array_literal ut ppf es
-  | FnMakeTuple -> (
-    pf ppf "std::forward_as_tuple(%a)" (list ~sep:comma pp_expr) es
-  )
+  | FnMakeTuple ->
+      pf ppf "std::forward_as_tuple(%a)" (list ~sep:comma pp_expr) es
   | FnMakeRowVec -> (
     match ut with
     | UnsizedType.URowVector ->

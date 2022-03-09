@@ -441,7 +441,10 @@ let verify_unnormalized cf loc id =
     && not ((cf.in_fun_def && cf.in_udf_dist_def) || cf.current_block = Model)
   then Semantic_error.invalid_unnormalized_fn loc |> error
 
-let mk_fun_app ~is_cond_dist ((x : fun_kind), (y : identifier), (z : (typed_expr_meta, fun_kind) expr_with list)) =
+let mk_fun_app ~is_cond_dist
+    ( (x : fun_kind)
+    , (y : identifier)
+    , (z : (typed_expr_meta, fun_kind) expr_with list) ) =
   if is_cond_dist then CondDistApp (x, y, z) else FunApp (x, y, z)
 
 let check_normal_fn ~is_cond_dist loc tenv id (es : Ast.typed_expression list) =
@@ -552,10 +555,10 @@ let make_function_variable cf loc id = function
           "Attempting to create function variable out of "
             (type_ : UnsizedType.t)]
 
-let check_make_tuple loc _ _ id tes = 
+let check_make_tuple loc _ _ id tes =
   mk_typed_expression
-  ~expr:(FunApp (StanLib FnPlain, id, tes))
-  ~ad_level:(expr_ad_lub tes) ~type_:UnsizedType.UMatrix ~loc
+    ~expr:(FunApp (StanLib FnPlain, id, tes))
+    ~ad_level:(expr_ad_lub tes) ~type_:UnsizedType.UMatrix ~loc
 
 let rec check_fn ~is_cond_dist loc cf tenv id (tes : Ast.typed_expression list)
     =
@@ -567,11 +570,9 @@ let rec check_fn ~is_cond_dist loc cf tenv id (tes : Ast.typed_expression list)
     check_variadic_dae ~is_cond_dist loc cf tenv id tes
   else if Stan_math_signatures.is_variadic_laplace_fn id.name then
     check_variadic_laplace ~is_cond_dist loc cf tenv id tes
-  else if id.name <> "forward_as_tuple" then 
+  else if id.name <> "forward_as_tuple" then
     check_normal_fn ~is_cond_dist loc tenv id tes
-  else  
-    check_make_tuple loc cf tenv id tes
-
+  else check_make_tuple loc cf tenv id tes
 
 and check_reduce_sum ~is_cond_dist loc cf tenv id tes =
   let basic_mismatch () =
@@ -733,42 +734,56 @@ and check_variadic_dae ~is_cond_dist loc cf tenv id tes =
 and check_variadic_laplace ~is_cond_dist (loc : Location_span.t)
     (cf : context_flags_record) (tenv : Env.t) (id : identifier)
     (tes : typed_expression list) =
-
   (* argument splitting *)
   let dist_vector_args, fn_variadic_args =
-    List.split_while
-      ~f:(fun {emeta= {type_; _}; _} -> not (UnsizedType.is_fun_type type_))
-      tes in
+    let blah1, blah2 =
+      List.split_while
+        ~f:(fun {emeta= {type_; _}; _} -> not (UnsizedType.is_fun_type type_))
+        tes in
+    let not_basic =
+      id.name <> "laplace_marginal_tol_lpdf"
+      && id.name <> "laplace_marginal_tol_lpmf"
+      && id.name <> "laplace_marginal_lpdf"
+      && id.name <> "laplace_marginal_lpmf"
+      && id.name <> "laplace_marginal_tol_rng"
+      && id.name <> "laplace_marginal_rng" in
+    if not_basic then (blah1, blah2)
+    else
+      let blah3, blah4 =
+        List.split_while
+          ~f:(fun {emeta= {type_; _}; _} -> not (UnsizedType.is_fun_type type_))
+          (List.tl_exn blah2) in
+      (blah1 @ [List.hd_exn blah2] @ blah3, blah4) in
   let init_vector =
     match List.last dist_vector_args with
     | Some v -> v
     | None -> Semantic_error.variadic_laplace_missing_args loc |> error in
   (*let dist_args = List.drop_last_exn dist_vector_args in
-  (* begin typechecking *)
-  (* 1. check that the pdf/pmf this is calling is valid *)
-  let internal_name =
-    id.name
-    |> String.chop_prefix_exn ~prefix:"laplace_marginal_"
-    |> String.substr_replace_all ~pattern:"_tol" ~with_:"" in
-  ignore  ignore the result - we only want this to raise an error *)
-    (* except for the possibility of promotions? 
-    ( check_normal_fn ~is_cond_dist:false loc tenv
-        {id with name= internal_name}
-        dist_args
-      : typed_expression ) ;*)
+    (* begin typechecking *)
+    (* 1. check that the pdf/pmf this is calling is valid *)
+    let internal_name =
+      id.name
+      |> String.chop_prefix_exn ~prefix:"laplace_marginal_"
+      |> String.substr_replace_all ~pattern:"_tol" ~with_:"" in
+    ignore  ignore the result - we only want this to raise an error *)
+  (* except for the possibility of promotions?
+     ( check_normal_fn ~is_cond_dist:false loc tenv
+         {id with name= internal_name}
+         dist_args
+       : typed_expression ) ;*)
   (* 2. check that the init vector is valid *)
   if init_vector.emeta.type_ <> UVector then
     Semantic_error.vector_expected init_vector.emeta.loc
       "Laplace initialization" init_vector.emeta.type_
     |> error ;
-  (* 3. check variadic function, similar to ODE/DAE/reduce_sum *)
-  let optional_tol_args : (UnsizedType.autodifftype * UnsizedType.t) list =
-    if Stan_math_signatures.is_variadic_laplace_tol_fn id.name then
-      Stan_math_signatures.variadic_laplace_tol_arg_types
-    else [] in
+  (* 3. check variadic function, similar to ODE/DAE/reduce_sum
+     let optional_tol_args : (UnsizedType.autodifftype * UnsizedType.t) list =
+       if Stan_math_signatures.is_variadic_laplace_tol_fn id.name then
+         Stan_math_signatures.variadic_laplace_tol_arg_types
+       else [] in
+  *)
   let mandatory_lp_arg_types : (UnsizedType.autodifftype * UnsizedType.t) list =
-    Stan_math_signatures.variadic_laplace_mandatory_arg_types
-    @ optional_tol_args in
+    Stan_math_signatures.variadic_laplace_mandatory_arg_types in
   let matching remaining_exprs Env.{type_= ftype; _} =
     let arg_types =
       (calculate_autodifftype cf Functions ftype, ftype)
@@ -778,42 +793,40 @@ and check_variadic_laplace ~is_cond_dist (loc : Location_span.t)
       Stan_math_signatures.variadic_laplace_fun_return_type arg_types in
   match fn_variadic_args with
   | {expr= Variable fname; _} :: remaining_es -> (
-    let check_first_order_fns fun_exprs =
-      match find_matching_first_order_fn tenv (matching fun_exprs) fname with
-      | SignatureMismatch.UniqueMatch (ftype, promotions) -> (ftype, promotions)
-      | AmbiguousMatch ps ->
-          Semantic_error.ambiguous_function_promotion loc fname.name None ps
-          |> error
-      | SignatureErrors (expected_args, err) ->
-          Semantic_error.illtyped_variadic_laplace loc id.name
-            (List.map ~f:type_of_expr_typed tes)
-            (List.map ~f:arg_type dist_vector_args @ expected_args)
-            err
-          |> error in 
-   match remaining_es with 
-   | {expr=FunApp (_, id1, es1);_} :: {expr=FunApp (_, id2, _);_} :: blah_es 
-    when id1.name = "forward_as_tuple" && id2.name = "forward_as_tuple" ->
-    let ftype, _ = check_first_order_fns (List.concat [es1; blah_es]) in 
-    let tes2 = make_function_variable cf loc fname ftype :: remaining_es in
-    mk_typed_expression
-      ~expr:
-        (mk_fun_app ~is_cond_dist
-            ( StanLib FnPlain
-            , id
-            , dist_vector_args @ tes2 ) )
-      ~ad_level:(expr_ad_lub tes) ~type_:UnsizedType.UVector ~loc
-   | _ ->
-    let ftype, promotions = check_first_order_fns remaining_es in 
-    let tes2 = make_function_variable cf loc fname ftype :: remaining_es in
-    mk_typed_expression
-      ~expr:
-        (mk_fun_app ~is_cond_dist
-            ( StanLib FnPlain
-            , id
-            , dist_vector_args @ Promotion.promote_list tes2 promotions ) )
-      ~ad_level:(expr_ad_lub tes) ~type_:UnsizedType.UReal ~loc
-
-  )
+      let check_first_order_fns fun_exprs =
+        match find_matching_first_order_fn tenv (matching fun_exprs) fname with
+        | SignatureMismatch.UniqueMatch (ftype, promotions) ->
+            (ftype, promotions)
+        | AmbiguousMatch ps ->
+            Semantic_error.ambiguous_function_promotion loc fname.name None ps
+            |> error
+        | SignatureErrors (expected_args, err) ->
+            Semantic_error.illtyped_variadic_laplace loc id.name
+              (List.map ~f:type_of_expr_typed tes)
+              (List.map ~f:arg_type dist_vector_args @ expected_args)
+              err
+            |> error in
+      match remaining_es with
+      | {expr= FunApp (_, id1, es1); _}
+        :: {expr= FunApp (_, id2, _); _} :: blah_es
+        when id1.name = "forward_as_tuple" && id2.name = "forward_as_tuple" ->
+          let ftype, _ = check_first_order_fns (List.concat [es1; blah_es]) in
+          let tes2 = make_function_variable cf loc fname ftype :: remaining_es in
+          mk_typed_expression
+            ~expr:
+              (mk_fun_app ~is_cond_dist
+                 (StanLib FnPlain, id, dist_vector_args @ tes2) )
+            ~ad_level:(expr_ad_lub tes) ~type_:UnsizedType.UVector ~loc
+      | _ ->
+          let ftype, promotions = check_first_order_fns remaining_es in
+          let tes2 = make_function_variable cf loc fname ftype :: remaining_es in
+          mk_typed_expression
+            ~expr:
+              (mk_fun_app ~is_cond_dist
+                 ( StanLib FnPlain
+                 , id
+                 , dist_vector_args @ Promotion.promote_list tes2 promotions ) )
+            ~ad_level:(expr_ad_lub tes) ~type_:UnsizedType.UReal ~loc )
   | _ ->
       let expected_args, err =
         SignatureMismatch.check_variadic_args false mandatory_lp_arg_types

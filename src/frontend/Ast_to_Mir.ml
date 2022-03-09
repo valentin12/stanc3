@@ -60,8 +60,8 @@ and trans_expr {Ast.expr; Ast.emeta} =
   | RealNumeral x -> Lit (Real, format_number x) |> ewrap
   | ImagNumeral x -> Lit (Imaginary, format_number x) |> ewrap
   | FunApp (_, {name; _}, args) when name = "forward_as_tuple" ->
-    FunApp (CompilerInternal FnMakeTuple, trans_exprs args) |> ewrap
-    | FunApp (fn_kind, {name; _}, args) | CondDistApp (fn_kind, {name; _}, args)
+      FunApp (CompilerInternal FnMakeTuple, trans_exprs args) |> ewrap
+  | FunApp (fn_kind, {name; _}, args) | CondDistApp (fn_kind, {name; _}, args)
     ->
       FunApp (trans_fn_kind fn_kind name, trans_exprs args) |> ewrap
   | GetLP | GetTarget -> FunApp (StanLib ("target", FnTarget, AoS), []) |> ewrap
