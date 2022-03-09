@@ -559,9 +559,6 @@ let check_make_tuple loc _ _ id tes =
 
 let rec check_fn ~is_cond_dist loc cf tenv id (tes : Ast.typed_expression list)
     =
-    let () = printf "\nGot check_fn\n" in
-    let () = printf "%s" id.name in
-
   if Stan_math_signatures.is_reduce_sum_fn id.name then
     check_reduce_sum ~is_cond_dist loc cf tenv id tes
   else if Stan_math_signatures.is_variadic_ode_fn id.name then
@@ -736,7 +733,6 @@ and check_variadic_dae ~is_cond_dist loc cf tenv id tes =
 and check_variadic_laplace ~is_cond_dist (loc : Location_span.t)
     (cf : context_flags_record) (tenv : Env.t) (id : identifier)
     (tes : typed_expression list) =
-    let () = printf "\nGot top of\n" in
 
   (* argument splitting *)
   let dist_vector_args, fn_variadic_args =
@@ -797,9 +793,7 @@ and check_variadic_laplace ~is_cond_dist (loc : Location_span.t)
    match remaining_es with 
    | {expr=FunApp (_, id1, es1);_} :: {expr=FunApp (_, id2, _);_} :: blah_es 
     when id1.name = "forward_as_tuple" && id2.name = "forward_as_tuple" ->
-    let () = printf "\nGot to first order\n" in
     let ftype, _ = check_first_order_fns (List.concat [es1; blah_es]) in 
-    let () = printf "\nGot past first order\n" in
     let tes2 = make_function_variable cf loc fname ftype :: remaining_es in
     mk_typed_expression
       ~expr:

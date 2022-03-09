@@ -417,6 +417,22 @@ and gen_functionals fname suffix es mem_pattern =
             let next_map_rect_id = Hashtbl.length map_rect_calls + 1 in
             Hashtbl.add_exn map_rect_calls ~key:next_map_rect_id ~data:f ;
             (strf "%s<%d, %s>" fname next_map_rect_id f, tl @ [msgs])
+        | x, args when Stan_math_signatures.is_variadic_laplace_fn x ->
+          let dist_vector_args, fn_variadic_args =
+          List.split_while
+            ~f:(fun {meta= {type_; _}; _} -> not (UnsizedType.is_fun_type type_)) args in
+          let fn_variadic_args_plus_msg =
+            let add_ons = if  String.is_suffix fname ~suffix:"_rng" then 
+              [to_var "base_rng__"; msgs]
+          else 
+            [msgs]
+          in
+            match fn_variadic_args with 
+            | [f] -> f :: add_ons  
+            | f :: rest_of_args -> f ::  add_ons @ rest_of_args 
+            | _ -> fn_variadic_args 
+          in
+            (fname, dist_vector_args @ fn_variadic_args_plus_msg)
         | _, args -> (fname, args @ [msgs]) in
       let fname =
         stan_namespace_qualify fname |> demangle_unnormalized_name false suffix
